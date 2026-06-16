@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -6,7 +6,7 @@ employees = []
 
 @app.route('/')
 def home():
-    return "Employee Management System Running Successfully!"
+    return render_template('index.html')
 
 @app.route('/employees', methods=['GET'])
 def get_employees():
