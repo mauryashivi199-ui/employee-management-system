@@ -1,0 +1,33 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+employees = []
+
+@app.route('/')
+def home():
+    return "Employee Management System Running Successfully!"
+
+@app.route('/employees', methods=['GET'])
+def get_employees():
+    return jsonify(employees)
+
+@app.route('/employee', methods=['POST'])
+def add_employee():
+    data = request.get_json()
+
+    employee = {
+        "id": data["id"],
+        "name": data["name"],
+        "department": data["department"]
+    }
+
+    employees.append(employee)
+
+    return jsonify({
+        "message": "Employee Added Successfully",
+        "employee": employee
+    })
+
+if __name__ == '__main__':
+    app.run(debug=True)
