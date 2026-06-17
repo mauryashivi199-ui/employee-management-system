@@ -1,594 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Employee Management System</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Employee System</title>
+
 <style>
-  :root{
-    --bg:#F3F5FA;
-    --surface:#FFFFFF;
-    --surface-alt:#EDF1F9;
-    --border:#E3E8F1;
-    --text:#1A1F2E;
-    --text-muted:#6B7280;
-    --primary:#20284D;
-    --primary-light:#2F3D72;
-    --accent:#14B8A6;
-    --accent-dark:#0E9488;
-    --warning:#F59E0B;
-    --danger:#E11D48;
-    --radius-lg:18px;
-    --radius-md:12px;
-    --radius-sm:8px;
-    --shadow-sm:0 1px 2px rgba(20,24,40,.04);
-    --shadow-md:0 10px 30px rgba(20,24,45,.08);
-    --font-display:'Space Grotesk',sans-serif;
-    --font-body:'Inter',sans-serif;
-    --font-mono:'JetBrains Mono',monospace;
-  }
-
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);}
-
-  .app{max-width:1140px;margin:0 auto;padding:36px 24px 80px;}
-
-  /* ---------- Topbar ---------- */
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:32px;}
-  .brand{display:flex;align-items:center;gap:14px;}
-  .brand-mark{
-    width:46px;height:46px;border-radius:var(--radius-sm);
-    background:linear-gradient(135deg,var(--primary),var(--primary-light));
-    color:#fff;font-family:var(--font-display);font-weight:700;font-size:16px;
-    display:flex;align-items:center;justify-content:center;letter-spacing:.5px;
-    box-shadow:var(--shadow-md);
-  }
-  .brand h1{font-family:var(--font-display);font-size:22px;font-weight:600;margin:0;letter-spacing:-.2px;}
-  .brand-sub{margin:2px 0 0;font-size:13px;color:var(--text-muted);}
-  .topbar-actions{display:flex;gap:10px;}
-
-  .btn{
-    font-family:var(--font-body);font-weight:600;font-size:14px;border:none;border-radius:var(--radius-sm);
-    padding:11px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
-    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
-  }
-  .btn:active{transform:translateY(1px) scale(.98);}
-  .btn-primary{background:var(--primary);color:#fff;box-shadow:var(--shadow-sm);}
-  .btn-primary:hover{background:var(--primary-light);box-shadow:0 6px 16px rgba(32,40,77,.25);transform:translateY(-1px);}
-  .btn-ghost{background:var(--surface);color:var(--primary);border:1px solid var(--border);}
-  .btn-ghost:hover{border-color:var(--primary-light);transform:translateY(-1px);}
-  .btn-secondary{background:var(--surface-alt);color:var(--text);}
-  .btn-secondary:hover{background:#E3E8F1;}
-  .btn-danger{background:var(--danger);color:#fff;}
-  .btn-danger:hover{background:#C11349;}
-  .btn-icon{
-    width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);
-    color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;
-    transition:all .15s ease;
-  }
-  .btn-icon:hover{background:var(--surface-alt);color:var(--text);transform:translateY(-1px);}
-  .btn-icon.danger-hover:hover{color:var(--danger);border-color:#FBD5DF;background:#FFF1F4;}
-
-  /* ---------- Stats ---------- */
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
-  .stat-card{
-    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
-    padding:18px 20px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
-  }
-  .stat-card::before{
-    content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent);
-  }
-  .stat-card:nth-child(2)::before{background:var(--primary-light);}
-  .stat-card:nth-child(3)::before{background:var(--warning);}
-  .stat-label{display:block;font-size:12.5px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
-  .stat-value{display:block;font-family:var(--font-display);font-size:28px;font-weight:700;margin-top:6px;color:var(--primary);}
-
-  /* ---------- Controls ---------- */
-  .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px;}
-  .search-wrap{position:relative;flex:1;min-width:220px;}
-  .search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-muted);}
-  #searchInput{
-    width:100%;padding:11px 14px 11px 38px;border:1px solid var(--border);border-radius:var(--radius-sm);
-    font-family:var(--font-body);font-size:14px;background:var(--surface);outline:none;
-    transition:border-color .15s ease, box-shadow .15s ease;
-  }
-  #searchInput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(20,184,166,.12);}
-  #sortSelect{
-    padding:11px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);
-    font-family:var(--font-body);font-size:14px;color:var(--text);cursor:pointer;outline:none;
-  }
-  .filter-chips{display:flex;gap:8px;flex-wrap:wrap;}
-  .chip{
-    padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);
-    font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .15s ease;white-space:nowrap;
-  }
-  .chip:hover{border-color:var(--accent);color:var(--accent-dark);}
-  .chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
-
-  /* ---------- Grid & Cards ---------- */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
-  .card{
-    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
-    padding:18px;box-shadow:var(--shadow-sm);
-    animation:cardIn .4s ease both;animation-delay:calc(var(--i,0) * 45ms);
-    transition:box-shadow .2s ease, transform .2s ease;
-  }
-  .card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
-  @keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
-
-  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-  .avatar{
-    width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;
-    font-family:var(--font-display);font-weight:700;font-size:15px;flex-shrink:0;
-  }
-  .card-actions{display:flex;gap:6px;}
-  .card-name{font-size:15.5px;font-weight:700;margin:12px 0 2px;color:var(--text);}
-  .card-id{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);}
-  .card-meta{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-  .badge{
-    font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:6px;letter-spacing:.2px;
-  }
-  .card-email{margin-top:10px;font-size:13px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .card-joined{margin-top:4px;font-size:12px;color:var(--text-muted);}
-
-  .empty-state{display:none;flex-direction:column;align-items:center;text-align:center;padding:60px 20px;color:var(--text-muted);}
-  .empty-state.show{display:flex;}
-  .empty-state svg{margin-bottom:14px;opacity:.5;}
-  .empty-state h3{font-family:var(--font-display);color:var(--text);margin:0 0 6px;}
-
-  /* ---------- Modal ---------- */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(20,24,45,.45);display:flex;align-items:center;justify-content:center;
-    z-index:100;opacity:0;animation:overlayIn .18s ease forwards;padding:20px;
-  }
-  .modal-overlay[hidden]{display:none !important;}
-  @keyframes overlayIn{to{opacity:1;}}
-  .modal{
-    background:var(--surface);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:420px;
-    box-shadow:0 30px 60px rgba(15,18,35,.25);transform:translateY(16px) scale(.97);opacity:0;
-    animation:modalIn .25s cubic-bezier(.2,.8,.2,1) forwards;position:relative;max-height:90vh;overflow-y:auto;
-  }
-  @keyframes modalIn{to{transform:translateY(0) scale(1);opacity:1;}}
-  .modal-sm{max-width:380px;}
-  .modal h2{font-family:var(--font-display);font-size:19px;margin:0 0 18px;}
-  .modal h3{font-family:var(--font-display);font-size:17px;margin:0 0 8px;}
-  .modal p{font-size:14px;color:var(--text-muted);line-height:1.5;margin:0 0 20px;}
-  .modal-close{
-    position:absolute;top:18px;right:18px;background:none;border:none;font-size:20px;color:var(--text-muted);
-    cursor:pointer;line-height:1;padding:4px;
-  }
-  .modal-close:hover{color:var(--text);}
-  .field{margin-bottom:14px;}
-  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--text-muted);margin-bottom:6px;}
-  .field input{
-    width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);
-    font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .15s ease, box-shadow .15s ease;
-  }
-  .field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(20,184,166,.12);}
-  .field input.invalid{border-color:var(--danger);}
-  .form-error{font-size:13px;color:var(--danger);margin:-4px 0 14px;min-height:1px;}
-  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
-  .shake{animation:shake .35s ease;}
-  @keyframes shake{20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}100%{transform:translateX(0);}}
-
-  /* ---------- Toast ---------- */
-  .toast-container{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:200;}
-  .toast{
-    background:var(--primary);color:#fff;padding:13px 18px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:500;
-    box-shadow:0 12px 28px rgba(20,24,45,.25);display:flex;align-items:center;gap:10px;min-width:220px;
-    animation:toastIn .25s ease forwards, toastOut .25s ease forwards 2.6s;
-  }
-  .toast.success{background:#0E7A6F;}
-  .toast.danger{background:var(--danger);}
-  @keyframes toastIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
-  @keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(30px);}}
-
-  @media (max-width:680px){
-    .stats{grid-template-columns:1fr;}
-    .topbar-actions{width:100%;}
-    .btn{flex:1;justify-content:center;}
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
-  }
+body{font-family:Arial;margin:0;background:#f4f6f8}
+header{display:flex;justify-content:space-between;padding:15px;background:#111;color:#fff}
+button{padding:8px 12px;border:0;cursor:pointer}
+.btn{background:#4f46e5;color:#fff;border-radius:6px}
+.container{padding:20px}
+input,select{padding:8px;margin:5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:15px}
+.card{background:#fff;padding:10px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+.small{font-size:12px;color:gray}
 </style>
+
 </head>
 <body>
 
-<div class="app">
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-mark">EM</span>
-      <div>
-        <h1>Employee Management</h1>
-        <p class="brand-sub">Team directory &amp; records</p>
-      </div>
-    </div>
-    <div class="topbar-actions">
-      <button class="btn btn-ghost" id="exportBtn">Export CSV</button>
-      <button class="btn btn-primary" id="addBtn">+ Add Employee</button>
-    </div>
-  </header>
+<header>
+<h2>Employee System</h2>
+<button onclick="openForm()" class="btn">+ Add</button>
+</header>
 
-  <section class="stats">
-    <div class="stat-card">
-      <span class="stat-label">Total Employees</span>
-      <span class="stat-value" id="statTotal">0</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Departments</span>
-      <span class="stat-value" id="statDepts">0</span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-label">Newest Hire</span>
-      <span class="stat-value" id="statNewest" style="font-size:16px;">—</span>
-    </div>
-  </section>
+<div class="container">
 
-  <section class="controls">
-    <div class="search-wrap">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="searchInput" placeholder="Search by name, ID, or email">
-    </div>
-    <select id="sortSelect">
-      <option value="name">Sort: Name A–Z</option>
-      <option value="newest">Sort: Newest first</option>
-      <option value="dept">Sort: Department</option>
-    </select>
-  </section>
+<input id="search" placeholder="Search..." onkeyup="render()"/>
+<select id="sort" onchange="render()">
+<option value="name">Sort Name</option>
+<option value="dept">Sort Dept</option>
+</select>
 
-  <div class="filter-chips" id="deptChips" style="margin-bottom:20px;"></div>
+<div class="grid" id="list"></div>
 
-  <section class="grid" id="employeeGrid"></section>
-
-  <div class="empty-state" id="emptyState">
-    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <h3>No employees found</h3>
-    <p style="margin:0;">Try a different search term, or add a new employee to get started.</p>
-  </div>
 </div>
 
-<!-- Add / Edit Modal -->
-<div class="modal-overlay" id="modalOverlay" hidden>
-  <div class="modal" id="modalCard">
-    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
-    <h2 id="modalTitle">Add Employee</h2>
-    <form id="employeeForm" novalidate>
-      <div class="field">
-        <label for="empId">Employee ID</label>
-        <input id="empId" autocomplete="off">
-      </div>
-      <div class="field">
-        <label for="empName">Full Name</label>
-        <input id="empName" autocomplete="off">
-      </div>
-      <div class="field">
-        <label for="empDept">Department</label>
-        <input id="empDept" list="deptOptions" autocomplete="off">
-        <datalist id="deptOptions"></datalist>
-      </div>
-      <div class="field">
-        <label for="empEmail">Email (optional)</label>
-        <input id="empEmail" autocomplete="off" placeholder="name@company.com">
-      </div>
-      <div class="form-error" id="formError"></div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="saveBtn">Save Employee</button>
-      </div>
-    </form>
-  </div>
+<!-- FORM -->
+<div id="form" style="display:none;position:fixed;top:20%;left:35%;background:#fff;padding:15px;box-shadow:0 0 10px #000">
+<h3>Add Employee</h3>
+<input id="id" placeholder="ID"/><br/>
+<input id="name" placeholder="Name"/><br/>
+<input id="dept" placeholder="Dept"/><br/>
+<input id="email" placeholder="Email"/><br/><br/>
+<button onclick="addEmp()" class="btn">Save</button>
+<button onclick="closeForm()">Close</button>
 </div>
-
-<!-- Confirm Delete Modal -->
-<div class="modal-overlay" id="confirmOverlay" hidden>
-  <div class="modal modal-sm">
-    <h3>Remove employee?</h3>
-    <p id="confirmText">This action can't be undone.</p>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" id="confirmCancel">Cancel</button>
-      <button class="btn btn-danger" id="confirmDelete">Remove</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
 <script>
-(function(){
-  const DEPT_PALETTE = [
-    {bg:'#E6FFFA', fg:'#0E7A6F'},
-    {bg:'#EEF2FF', fg:'#4338CA'},
-    {bg:'#FFF7ED', fg:'#C2410C'},
-    {bg:'#FDF2F8', fg:'#BE185D'},
-    {bg:'#F5F3FF', fg:'#7C3AED'},
-    {bg:'#ECFEFF', fg:'#0E7490'},
-    {bg:'#ECFDF5', fg:'#047857'},
-    {bg:'#FFFBEB', fg:'#B45309'}
-  ];
+let employees = [];
 
-  const today = new Date();
-  function daysAgo(n){ const d = new Date(today); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
+function openForm(){document.getElementById("form").style.display="block"}
+function closeForm(){document.getElementById("form").style.display="none"}
 
-  let employees = [
-    {id:'EMP-101', name:'Ananya Sharma', dept:'Engineering', email:'ananya.sharma@company.com', joined: daysAgo(420)},
-    {id:'EMP-102', name:'Rohan Verma', dept:'Marketing', email:'rohan.verma@company.com', joined: daysAgo(310)},
-    {id:'EMP-103', name:'Priya Nair', dept:'Engineering', email:'priya.nair@company.com', joined: daysAgo(180)},
-    {id:'EMP-104', name:'Karan Mehta', dept:'Sales', email:'karan.mehta@company.com', joined: daysAgo(95)},
-    {id:'EMP-105', name:'Simran Kaur', dept:'Human Resources', email:'simran.kaur@company.com', joined: daysAgo(40)},
-    {id:'EMP-106', name:'Dev Patel', dept:'Finance', email:'', joined: daysAgo(12)}
-  ];
-
-  let activeDept = 'all';
-  let searchTerm = '';
-  let sortMode = 'name';
-  let editingId = null;
-  let pendingDeleteId = null;
-
-  const grid = document.getElementById('employeeGrid');
-  const emptyState = document.getElementById('emptyState');
-  const chipsWrap = document.getElementById('deptChips');
-  const statTotal = document.getElementById('statTotal');
-  const statDepts = document.getElementById('statDepts');
-  const statNewest = document.getElementById('statNewest');
-  const searchInput = document.getElementById('searchInput');
-  const sortSelect = document.getElementById('sortSelect');
-
-  const modalOverlay = document.getElementById('modalOverlay');
-  const modalCard = document.getElementById('modalCard');
-  const modalTitle = document.getElementById('modalTitle');
-  const form = document.getElementById('employeeForm');
-  const empIdInput = document.getElementById('empId');
-  const empNameInput = document.getElementById('empName');
-  const empDeptInput = document.getElementById('empDept');
-  const empEmailInput = document.getElementById('empEmail');
-  const formError = document.getElementById('formError');
-  const deptOptions = document.getElementById('deptOptions');
-
-  const confirmOverlay = document.getElementById('confirmOverlay');
-  const confirmText = document.getElementById('confirmText');
-
-  function deptColor(dept){
-    let hash = 0;
-    for(let i=0;i<dept.length;i++){ hash = (hash + dept.charCodeAt(i) * (i+1)) % DEPT_PALETTE.length; }
-    return DEPT_PALETTE[hash];
-  }
-
-  function initials(name){
-    const parts = name.trim().split(/\s+/);
-    return ((parts[0]?.[0]||'') + (parts[1]?.[0]||'')).toUpperCase();
-  }
-
-  function formatDate(iso){
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
-  }
-
-  function escapeHtml(str){
-    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-
-  function animateNumber(el, to){
-    const from = parseInt(el.textContent) || 0;
-    if(from === to){ el.textContent = to; return; }
-    const duration = 400, start = performance.now();
-    function step(now){
-      const progress = Math.min((now - start) / duration, 1);
-      el.textContent = Math.round(from + (to - from) * progress);
-      if(progress < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
-
-  function renderStats(){
-    animateNumber(statTotal, employees.length);
-    const depts = new Set(employees.map(e => e.dept));
-    animateNumber(statDepts, depts.size);
-    if(employees.length === 0){ statNewest.textContent = '—'; statNewest.style.fontSize='28px'; }
-    else{
-      const newest = [...employees].sort((a,b) => new Date(b.joined) - new Date(a.joined))[0];
-      statNewest.textContent = newest.name;
-      statNewest.style.fontSize = '16px';
-    }
-  }
-
-  function renderChips(){
-    const depts = [...new Set(employees.map(e => e.dept))];
-    deptOptions.innerHTML = ['Engineering','Marketing','Sales','Human Resources','Finance','Operations','Design','Support','Product', ...depts]
-      .filter((v,i,a) => a.indexOf(v) === i)
-      .map(d => `<option value="${escapeHtml(d)}">`).join('');
-
-    let html = `<button class="chip ${activeDept==='all'?'active':''}" data-dept="all">All (${employees.length})</button>`;
-    depts.sort().forEach(d => {
-      const count = employees.filter(e => e.dept === d).length;
-      html += `<button class="chip ${activeDept===d?'active':''}" data-dept="${escapeHtml(d)}">${escapeHtml(d)} (${count})</button>`;
-    });
-    chipsWrap.innerHTML = html;
-    chipsWrap.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => { activeDept = chip.dataset.dept; renderChips(); renderGrid(); });
-    });
-  }
-
-  function getFiltered(){
-    let list = employees.filter(e => {
-      const matchesDept = activeDept === 'all' || e.dept === activeDept;
-      const term = searchTerm.toLowerCase();
-      const matchesSearch = !term ||
-        e.name.toLowerCase().includes(term) ||
-        e.id.toLowerCase().includes(term) ||
-        (e.email && e.email.toLowerCase().includes(term));
-      return matchesDept && matchesSearch;
-    });
-    if(sortMode === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
-    else if(sortMode === 'newest') list.sort((a,b) => new Date(b.joined) - new Date(a.joined));
-    else if(sortMode === 'dept') list.sort((a,b) => a.dept.localeCompare(b.dept) || a.name.localeCompare(b.name));
-    return list;
-  }
-
-  function renderGrid(){
-    const list = getFiltered();
-    emptyState.classList.toggle('show', list.length === 0);
-    grid.style.display = list.length === 0 ? 'none' : 'grid';
-
-    grid.innerHTML = list.map((e, i) => {
-      const color = deptColor(e.dept);
-      return `
-      <div class="card" style="--i:${i}">
-        <div class="card-top">
-          <div class="avatar" style="background:${color.bg};color:${color.fg}">${initials(e.name)}</div>
-          <div class="card-actions">
-            <button class="btn-icon" title="Edit" data-action="edit" data-id="${escapeHtml(e.id)}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
-            <button class="btn-icon danger-hover" title="Remove" data-action="delete" data-id="${escapeHtml(e.id)}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="card-name">${escapeHtml(e.name)}</div>
-        <div class="card-id">${escapeHtml(e.id)}</div>
-        <div class="card-meta">
-          <span class="badge" style="background:${color.bg};color:${color.fg}">${escapeHtml(e.dept)}</span>
-        </div>
-        ${e.email ? `<div class="card-email">${escapeHtml(e.email)}</div>` : ''}
-        <div class="card-joined">Joined ${formatDate(e.joined)}</div>
-      </div>`;
-    }).join('');
-
-    grid.querySelectorAll('[data-action="edit"]').forEach(btn => btn.addEventListener('click', () => openModal('edit', btn.dataset.id)));
-    grid.querySelectorAll('[data-action="delete"]').forEach(btn => btn.addEventListener('click', () => openConfirm(btn.dataset.id)));
-  }
-
-  function renderAll(){ renderStats(); renderChips(); renderGrid(); }
-
-  // ---- Modal logic ----
-  function openModal(mode, id){
-    editingId = mode === 'edit' ? id : null;
-    formError.textContent = '';
-    [empIdInput, empNameInput, empDeptInput, empEmailInput].forEach(i => i.classList.remove('invalid'));
-    if(mode === 'edit'){
-      const emp = employees.find(e => e.id === id);
-      modalTitle.textContent = 'Edit Employee';
-      empIdInput.value = emp.id;
-      empNameInput.value = emp.name;
-      empDeptInput.value = emp.dept;
-      empEmailInput.value = emp.email || '';
-    } else {
-      modalTitle.textContent = 'Add Employee';
-      form.reset();
-    }
-    modalOverlay.hidden = false;
-    setTimeout(() => empIdInput.focus(), 50);
-  }
-
-  function closeModal(){ modalOverlay.hidden = true; }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const id = empIdInput.value.trim();
-    const name = empNameInput.value.trim();
-    const dept = empDeptInput.value.trim();
-    const email = empEmailInput.value.trim();
-
-    [empIdInput, empNameInput, empDeptInput].forEach(i => i.classList.remove('invalid'));
-    formError.textContent = '';
-
-    if(!id || !name || !dept){
-      if(!id) empIdInput.classList.add('invalid');
-      if(!name) empNameInput.classList.add('invalid');
-      if(!dept) empDeptInput.classList.add('invalid');
-      formError.textContent = 'Employee ID, Name, and Department are required.';
-      modalCard.classList.add('shake');
-      setTimeout(() => modalCard.classList.remove('shake'), 350);
-      return;
-    }
-
-    const duplicate = employees.find(e => e.id.toLowerCase() === id.toLowerCase() && e.id !== editingId);
-    if(duplicate){
-      empIdInput.classList.add('invalid');
-      formError.textContent = `Employee ID "${id}" is already in use.`;
-      modalCard.classList.add('shake');
-      setTimeout(() => modalCard.classList.remove('shake'), 350);
-      return;
-    }
-
-    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-      empEmailInput.classList.add('invalid');
-      formError.textContent = 'That email address doesn\'t look right.';
-      return;
-    }
-
-    if(editingId){
-      const emp = employees.find(e => e.id === editingId);
-      Object.assign(emp, {id, name, dept, email});
-      showToast(`Updated ${name}'s record.`, 'success');
-    } else {
-      employees.push({id, name, dept, email, joined: new Date().toISOString().slice(0,10)});
-      showToast(`${name} added to the team.`, 'success');
-    }
-    closeModal();
-    renderAll();
+function addEmp(){
+  employees.push({
+    id: id.value,
+    name: name.value,
+    dept: dept.value,
+    email: email.value
   });
+  closeForm();
+  render();
+}
 
-  document.getElementById('addBtn').addEventListener('click', () => openModal('add'));
-  document.getElementById('modalClose').addEventListener('click', closeModal);
-  document.getElementById('cancelBtn').addEventListener('click', closeModal);
-  modalOverlay.addEventListener('click', e => { if(e.target === modalOverlay) closeModal(); });
+function deleteEmp(i){
+  employees.splice(i,1);
+  render();
+}
 
-  // ---- Confirm delete ----
-  function openConfirm(id){
-    pendingDeleteId = id;
-    const emp = employees.find(e => e.id === id);
-    confirmText.textContent = `Remove ${emp.name} (${emp.id}) from the directory? This action can't be undone.`;
-    confirmOverlay.hidden = false;
-  }
-  document.getElementById('confirmCancel').addEventListener('click', () => confirmOverlay.hidden = true);
-  document.getElementById('confirmDelete').addEventListener('click', () => {
-    const emp = employees.find(e => e.id === pendingDeleteId);
-    employees = employees.filter(e => e.id !== pendingDeleteId);
-    confirmOverlay.hidden = true;
-    showToast(`${emp.name} removed.`, 'danger');
-    if(activeDept !== 'all' && !employees.some(e => e.dept === activeDept)) activeDept = 'all';
-    renderAll();
-  });
-  confirmOverlay.addEventListener('click', e => { if(e.target === confirmOverlay) confirmOverlay.hidden = true; });
+function render(){
+  let list = [...employees];
+  let s = search.value.toLowerCase();
 
-  document.addEventListener('keydown', e => {
-    if(e.key === 'Escape'){ closeModal(); confirmOverlay.hidden = true; }
-  });
+  list = list.filter(e =>
+    e.name.toLowerCase().includes(s) ||
+    e.id.toLowerCase().includes(s)
+  );
 
-  // ---- Search & sort ----
-  searchInput.addEventListener('input', e => { searchTerm = e.target.value; renderGrid(); });
-  sortSelect.addEventListener('change', e => { sortMode = e.target.value; renderGrid(); });
+  if(sort.value==="name") list.sort((a,b)=>a.name.localeCompare(b.name));
+  if(sort.value==="dept") list.sort((a,b)=>a.dept.localeCompare(b.dept));
 
-  // ---- Export CSV ----
-  document.getElementById('exportBtn').addEventListener('click', () => {
-    const rows = [['Employee ID','Name','Department','Email','Date Joined'],
-      ...employees.map(e => [e.id, e.name, e.dept, e.email, e.joined])];
-    const csv = rows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], {type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'employees.csv';
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-    showToast('Employee list exported.', 'success');
-  });
+  document.getElementById("list").innerHTML =
+    list.map((e,i)=>`
+      <div class="card">
+        <b>${e.name}</b><br/>
+        <span class="small">${e.dept}</span><br/>
+        <span class="small">${e.email}</span><br/>
+        <button onclick="deleteEmp(${i})">Delete</button>
+      </div>
+    `).join("");
+}
 
-  // ---- Toasts ----
-  function showToast(message, type){
-    const toast = document.createElement('div');
-    toast.className = `toast ${type||''}`;
-    toast.textContent = message;
-    document.getElementById('toastContainer').appendChild(toast);
-    setTimeout(() => toast.remove(), 2900);
-  }
-
-  renderAll();
-})();
+render();
 </script>
+
 </body>
 </html>
