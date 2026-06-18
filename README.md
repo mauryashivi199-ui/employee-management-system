@@ -69,3 +69,36 @@ docker run -p 5000:5000 employee-management-system
 ```
 
 ## 📂 Project Structure
+employee-management-system/
+
+├── index.html          # Standalone frontend (used for GitHub Pages)
+
+├── templates/
+
+│   └── index.html      # Flask-served version
+
+├── static/              # CSS/JS assets for Flask version
+
+├── app.py               # Flask application
+
+├── requirements.txt
+
+├── Dockerfile
+
+└── README.md
+
+## 🗺️ Roadmap
+
+- [ ] Persist data with a backend database (currently in-memory)
+- [ ] Add authentication for admin access
+- [ ] Add employee photo uploads
+- [ ] Add pagination for large employee lists
+
+## 👩‍💻 Author
+
+**Shivangi Maurya**
+[GitHub](https://github.com/mauryashivi199-ui) · [LinkedIn](https://linkedin.com/in/shivangi-maurya-bba074380)
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
