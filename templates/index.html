@@ -40,10 +40,10 @@ input,select{padding:8px;margin:5px}
 <!-- FORM -->
 <div id="form" style="display:none;position:fixed;top:20%;left:35%;background:#fff;padding:15px;box-shadow:0 0 10px #000">
 <h3>Add Employee</h3>
-<input id="id" placeholder="ID"/><br/>
-<input id="name" placeholder="Name"/><br/>
-<input id="dept" placeholder="Dept"/><br/>
-<input id="email" placeholder="Email"/><br/><br/>
+<input id="empId" placeholder="ID"/><br/>
+<input id="empName" placeholder="Name"/><br/>
+<input id="empDept" placeholder="Dept"/><br/>
+<input id="empEmail" placeholder="Email"/><br/><br/>
 <button onclick="addEmp()" class="btn">Save</button>
 <button onclick="closeForm()">Close</button>
 </div>
@@ -51,44 +51,56 @@ input,select{padding:8px;margin:5px}
 <script>
 let employees = [];
 
-function openForm(){document.getElementById("form").style.display="block"}
-function closeForm(){document.getElementById("form").style.display="none"}
+function openForm(){ document.getElementById("form").style.display = "block"; }
+function closeForm(){ document.getElementById("form").style.display = "none"; }
 
 function addEmp(){
-  employees.push({
-    id: id.value,
-    name: name.value,
-    dept: dept.value,
-    email: email.value
-  });
+  const idVal = document.getElementById("empId").value.trim();
+  const nameVal = document.getElementById("empName").value.trim();
+  const deptVal = document.getElementById("empDept").value.trim();
+  const emailVal = document.getElementById("empEmail").value.trim();
+
+  if(!idVal || !nameVal){
+    alert("ID and Name are required");
+    return;
+  }
+
+  employees.push({ id: idVal, name: nameVal, dept: deptVal, email: emailVal });
+
+  document.getElementById("empId").value = "";
+  document.getElementById("empName").value = "";
+  document.getElementById("empDept").value = "";
+  document.getElementById("empEmail").value = "";
+
   closeForm();
   render();
 }
 
-function deleteEmp(i){
-  employees.splice(i,1);
+function deleteEmp(id){
+  employees = employees.filter(e => e.id !== id);
   render();
 }
 
 function render(){
   let list = [...employees];
-  let s = search.value.toLowerCase();
+  let s = document.getElementById("search").value.toLowerCase();
+  let sortVal = document.getElementById("sort").value;
 
   list = list.filter(e =>
     e.name.toLowerCase().includes(s) ||
     e.id.toLowerCase().includes(s)
   );
 
-  if(sort.value==="name") list.sort((a,b)=>a.name.localeCompare(b.name));
-  if(sort.value==="dept") list.sort((a,b)=>a.dept.localeCompare(b.dept));
+  if(sortVal === "name") list.sort((a,b) => a.name.localeCompare(b.name));
+  if(sortVal === "dept") list.sort((a,b) => a.dept.localeCompare(b.dept));
 
   document.getElementById("list").innerHTML =
-    list.map((e,i)=>`
+    list.map(e => `
       <div class="card">
         <b>${e.name}</b><br/>
         <span class="small">${e.dept}</span><br/>
         <span class="small">${e.email}</span><br/>
-        <button onclick="deleteEmp(${i})">Delete</button>
+        <button onclick="deleteEmp('${e.id}')">Delete</button>
       </div>
     `).join("");
 }
