@@ -1,11 +1,4 @@
-
-
-   https://mauryashivi199-ui.github.io/employee-management-system/?v=2
-
-Agar abhi bhi purana dikhe, 5-7 minute wait karo (GitHub Pages ka CDN propagate hone mein itna time le sakta hai), phir same Edge mein try karo
-
-Batao Edge mein try karke kya dikhta hai.You said: yrr ab readmi file axe se bnaoyrr ab readmi file axe se bnao5:43 PMClaude responded: Ek professional README bana deti hoon — seedha copy-paste karne layak, GitHub pe achha dikhega badges, live demo link, aur sections ke saath:Architected polished README with badges, features, and deployment detailsArchitected polished README with badges, features, and deployment detailsEk professional README bana deti hoon — seedha copy-paste karne layak, GitHub pe achha dikhega badges, live demo link, aur sections ke saath:
-markdown# 👥 Employee Management System
+# 👥 Employee Management System
 
 A clean, modern Employee Management dashboard built with vanilla HTML, CSS, and JavaScript — featuring smooth animations, real-time search/filter, and a polished UI inspired by modern SaaS dashboards.
 
@@ -76,36 +69,3 @@ docker run -p 5000:5000 employee-management-system
 ```
 
 ## 📂 Project Structure
-employee-management-system/
-
-├── index.html          # Standalone frontend (used for GitHub Pages)
-
-├── templates/
-
-│   └── index.html      # Flask-served version
-
-├── static/              # CSS/JS assets for Flask version
-
-├── app.py               # Flask application
-
-├── requirements.txt
-
-├── Dockerfile
-
-└── README.md
-
-## 🗺️ Roadmap
-
-- [ ] Persist data with a backend database (currently in-memory)
-- [ ] Add authentication for admin access
-- [ ] Add employee photo uploads
-- [ ] Add pagination for large employee lists
-
-## 👩‍💻 Author
-
-**Shivangi Maurya**
-[GitHub](https://github.com/mauryashivi199-ui) · [LinkedIn](https://linkedin.com/in/shivangi-maurya-bba074380)
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
