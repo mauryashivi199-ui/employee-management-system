@@ -1,52 +1,39 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import mysql.connector
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 db = mysql.connector.connect(
-    host="localhost",
+    host="172.17.0.1",
     user="root",
-    password="YOUR_PASSWORD",
-    database="employee_db"
+    password="Test@1234",
+    database="mydb"
 )
-
 cursor = db.cursor()
 
-# ✅ Add Employee (POST API)
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 @app.route('/employee', methods=['POST'])
 def add_employee():
     data = request.get_json()
-
     name = data['name']
     email = data['email']
     department = data['department']
-
     sql = "INSERT INTO employees (name, email, department) VALUES (%s, %s, %s)"
-    values = (name, email, department)
-
-    cursor.execute(sql, values)
+    cursor.execute(sql, (name, email, department))
     db.commit()
-
     return jsonify({"message": "Employee added successfully"}), 201
 
-
-# ✅ Get All Employees (GET API)
 @app.route('/employees', methods=['GET'])
 def get_employees():
     cursor.execute("SELECT * FROM employees")
     rows = cursor.fetchall()
-
     result = []
     for row in rows:
-        result.append({
-            "id": row[0],
-            "name": row[1],
-            "email": row[2],
-            "department": row[3]
-        })
-
+        result.append({"id": row[0], "name": row[1], "email": row[2], "department": row[3]})
     return jsonify(result)
 
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
