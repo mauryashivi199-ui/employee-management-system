@@ -313,14 +313,11 @@
   const today = new Date();
   function daysAgo(n){ const d = new Date(today); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
 
-  let employees = [
-    {id:'EMP-101', name:'Ananya Sharma', dept:'Engineering', email:'ananya.sharma@company.com', joined: daysAgo(420)},
-    {id:'EMP-102', name:'Rohan Verma', dept:'Marketing', email:'rohan.verma@company.com', joined: daysAgo(310)},
-    {id:'EMP-103', name:'Priya Nair', dept:'Engineering', email:'priya.nair@company.com', joined: daysAgo(180)},
-    {id:'EMP-104', name:'Karan Mehta', dept:'Sales', email:'karan.mehta@company.com', joined: daysAgo(95)},
-    {id:'EMP-105', name:'Simran Kaur', dept:'Human Resources', email:'simran.kaur@company.com', joined: daysAgo(40)},
-    {id:'EMP-106', name:'Dev Patel', dept:'Finance', email:'', joined: daysAgo(12)}
-  ];
+ let employees = [];
+  fetch('/employees').then(r=>r.json()).then(data=>{
+    employees = data.map(e=>({id:String(e.id), name:e.name, dept:e.department, email:e.email, joined:new Date().toISOString().slice(0,10)}));
+    renderAll();
+  });
 
   let activeDept = 'all';
   let searchTerm = '';
