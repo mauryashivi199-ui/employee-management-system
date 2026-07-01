@@ -518,17 +518,29 @@
       return;
     }
 
-    if(editingId){
-      const emp = employees.find(e => e.id === editingId);
-      Object.assign(emp, {id, name, dept, email});
-      showToast(`Updated ${name}'s record.`, 'success');
-    } else {
-      employees.push({id, name, dept, email, joined: new Date().toISOString().slice(0,10)});
-      showToast(`${name} added to the team.`, 'success');
-    }
+  if(editingId){
+    const emp = employees.find(e => e.id === editingId);
+    Object.assign(emp, {id, name, dept, email});
+    showToast(`Updated ${name}'s record.`, 'success');
     closeModal();
     renderAll();
-  });
+} else {
+    fetch('/employee', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: name, email: email, department: dept})
+    })
+    .then(r => r.json())
+    .then(data => {
+        showToast(`${name} added to the team.`, 'success');
+        fetch('/employees').then(r=>r.json()).then(data=>{
+            employees = data.map(e=>({id:String(e.id), name:e.name, dept:e.department, email:e.email, joined:new Date().toISOString().slice(0,10)}));
+            renderAll();
+        });
+        closeModal();
+    })
+    .catch(() => showToast('Error adding employee.', 'danger'));
+}
 
   document.getElementById('addBtn').addEventListener('click', () => openModal('add'));
   document.getElementById('modalClose').addEventListener('click', closeModal);
