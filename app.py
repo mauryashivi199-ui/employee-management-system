@@ -4,9 +4,9 @@ import mysql.connector
 app = Flask(__name__, template_folder='templates')
 
 db = mysql.connector.connect(
-    host="172.17.0.1",
+    host="mysql-service",
     user="root",
-    password="Test@1234",
+    password="root",
     database="mydb"
 )
 cursor = db.cursor()
