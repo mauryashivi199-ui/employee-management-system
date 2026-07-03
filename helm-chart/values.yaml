@@ -8,7 +8,7 @@ image:
 service:
   type: NodePort
   port: 5000
-  nodePort: 31522
+  nodePort: 31523
 
 mysql:
   host: mysql-service
