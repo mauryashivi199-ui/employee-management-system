@@ -1,14 +1,14 @@
 replicaCount: 1
 
 image:
-  repository: mauryashivi/employee-management-app
-  tag: latest
+  repository: 10.89.40.52:30443/ems-project/ems-app
+  tag: v1
   pullPolicy: Always
 
 service:
   type: NodePort
   port: 5000
-  nodePort: 31523
+  nodePort: 31522
 
 mysql:
   host: mysql-service
