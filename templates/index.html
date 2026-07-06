@@ -42,6 +42,9 @@
   .btn-secondary:hover{background:#E6E8F5;}
   .btn-danger{background:var(--danger);color:#fff;}
   .btn-danger:hover{background:#D93A5F;box-shadow:0 8px 20px rgba(239,71,111,.3);}
+  .btn-success{background:var(--accent);color:#fff;}
+  .btn-success:hover{background:var(--accent-dark);box-shadow:0 8px 20px rgba(18,184,134,.3);}
+  .btn-sm{padding:7px 13px;font-size:12.5px;}
   .btn-icon{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s cubic-bezier(.2,.8,.2,1);}
   .btn-icon:hover{background:var(--surface-alt);color:var(--primary);transform:translateY(-2px) scale(1.05);}
   .btn-icon.danger-hover:hover{color:var(--danger);border-color:#FBD5DF;background:#FFF1F4;}
@@ -101,6 +104,9 @@
   .att-pill.absent{background:#FFE4E6;color:#BE123C;}
   .att-pill.half{background:#FEF3C7;color:#B45309;}
   .att-pill.unmarked{background:var(--surface-alt);color:var(--text-muted);}
+  .att-pill.pending{background:#FEF3C7;color:#B45309;}
+  .att-pill.approved{background:#ECFDF5;color:#0C9A70;}
+  .att-pill.rejected{background:#FFE4E6;color:#BE123C;}
   .att-list{display:flex;flex-direction:column;gap:10px;}
   .att-row{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 18px;flex-wrap:wrap;animation:cardIn .4s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 45ms);transition:box-shadow .2s ease,transform .2s ease;}
   .att-row:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px);}
@@ -113,6 +119,14 @@
   .att-btn.present-btn:hover,.att-btn.present-btn.selected{background:#ECFDF5;color:#0C9A70;border-color:#A7F3D0;}
   .att-btn.absent-btn:hover,.att-btn.absent-btn.selected{background:#FFE4E6;color:#BE123C;border-color:#FECDD3;}
   .att-btn.half-btn:hover,.att-btn.half-btn.selected{background:#FEF3C7;color:#B45309;border-color:#FDE68A;}
+  .leave-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;margin-bottom:12px;animation:cardIn .4s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 45ms);transition:box-shadow .2s ease,transform .2s ease;}
+  .leave-card:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px);}
+  .leave-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .leave-emp{font-weight:700;font-size:15px;}
+  .leave-type-tag{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--surface-alt);color:var(--text-muted);margin-left:8px;}
+  .leave-dates{font-size:13px;color:var(--text-muted);margin-top:6px;}
+  .leave-reason{font-size:13.5px;color:var(--text);margin-top:8px;background:var(--surface-alt);padding:8px 12px;border-radius:8px;}
+  .leave-actions{display:flex;gap:8px;margin-top:12px;}
   .modal-overlay{position:fixed;inset:0;background:rgba(29,35,51,.45);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;animation:overlayIn .2s ease forwards;padding:20px;}
   .modal-overlay[hidden]{display:none !important;}
   @keyframes overlayIn{to{opacity:1;}}
@@ -126,9 +140,10 @@
   .modal-close:hover{color:var(--text);transform:rotate(90deg);}
   .field{margin-bottom:14px;}
   .field label{display:block;font-size:12.5px;font-weight:600;color:var(--text-muted);margin-bottom:6px;}
-  .field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .18s ease,box-shadow .18s ease;background:#fff;}
-  .field input:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(79,70,229,.12);}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .18s ease,box-shadow .18s ease;background:#fff;resize:vertical;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(79,70,229,.12);}
   .field input.invalid,.field select.invalid{border-color:var(--danger);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .form-error{font-size:13px;color:var(--danger);margin:-4px 0 14px;min-height:1px;}
   .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
   .shake{animation:shake .35s ease;}
@@ -139,7 +154,7 @@
   .toast.danger{background:linear-gradient(135deg,var(--danger),#D93A5F);box-shadow:0 14px 32px rgba(239,71,111,.3);}
   @keyframes toastIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
   @keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(30px);}}
-  @media(max-width:680px){.stats{grid-template-columns:1fr;}.topbar-actions{width:100%;}.btn{flex:1;justify-content:center;}.att-row{flex-direction:column;align-items:flex-start;}}
+  @media(max-width:680px){.stats{grid-template-columns:1fr;}.topbar-actions{width:100%;}.btn{flex:1;justify-content:center;}.att-row{flex-direction:column;align-items:flex-start;}.field-row{grid-template-columns:1fr;}}
   @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}.bg-orb{display:none;}}
 </style>
 </head>
@@ -160,11 +175,15 @@
       <button class="btn btn-ghost" id="exportBtn">Export CSV</button>
       <button class="btn btn-primary" id="addBtn">+ Add Employee</button>
     </div>
+    <div class="topbar-actions" id="leavesActions" style="display:none;">
+      <button class="btn btn-primary" id="applyLeaveBtn">+ Apply Leave</button>
+    </div>
   </header>
 
   <div class="nav-tabs">
     <button class="nav-tab active" id="tabEmployees">Employees</button>
     <button class="nav-tab" id="tabAttendance">Attendance</button>
+    <button class="nav-tab" id="tabLeaves">Leaves</button>
   </div>
 
   <!-- EMPLOYEES VIEW -->
@@ -202,9 +221,18 @@
     </div>
     <div class="att-list" id="attList"></div>
   </div>
+
+  <!-- LEAVES VIEW -->
+  <div class="view" id="leavesView">
+    <div class="att-header">
+      <div class="att-date">Leave Requests</div>
+      <div class="att-summary" id="leaveSummary"></div>
+    </div>
+    <div id="leaveList"></div>
+  </div>
 </div>
 
-<!-- Add / Edit Modal -->
+<!-- Add / Edit Employee Modal -->
 <div class="modal-overlay" id="modalOverlay" hidden>
   <div class="modal" id="modalCard">
     <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
@@ -218,6 +246,34 @@
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
         <button type="submit" class="btn btn-primary" id="saveBtn">Save Employee</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Apply Leave Modal -->
+<div class="modal-overlay" id="leaveModalOverlay" hidden>
+  <div class="modal" id="leaveModalCard">
+    <button class="modal-close" id="leaveModalClose" aria-label="Close">&times;</button>
+    <h2>Apply Leave</h2>
+    <form id="leaveForm" novalidate>
+      <div class="field"><label for="leaveEmp">Employee</label><select id="leaveEmp"><option value="">Select employee</option></select></div>
+      <div class="field"><label for="leaveType">Leave Type</label>
+        <select id="leaveType">
+          <option value="Casual">Casual</option>
+          <option value="Sick">Sick</option>
+          <option value="Paid">Paid</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="leaveStart">Start Date</label><input type="date" id="leaveStart"></div>
+        <div class="field"><label for="leaveEnd">End Date</label><input type="date" id="leaveEnd"></div>
+      </div>
+      <div class="field"><label for="leaveReason">Reason</label><textarea id="leaveReason" rows="3" placeholder="Brief reason for leave"></textarea></div>
+      <div class="form-error" id="leaveFormError"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="leaveCancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit Request</button>
       </div>
     </form>
   </div>
@@ -248,6 +304,7 @@
   let employees = [];
   let departments = [];
   let attendanceToday = [];
+  let leaves = [];
 
   function loadDepartments(){
     return fetch('/departments').then(r=>r.json()).then(data=>{
@@ -261,12 +318,18 @@
       departments.map(d=>`<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
   }
 
+  function populateLeaveEmpSelect(){
+    leaveEmp.innerHTML = '<option value="">Select employee</option>' +
+      employees.map(e=>`<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
+  }
+
   function loadEmployees(){
     return fetch('/employees').then(r=>r.json()).then(data=>{
       employees = data.map(e=>({
         id:String(e.id), name:e.name, dept:e.department||'Unassigned', deptId:e.department_id,
         email:e.email, joined:new Date().toISOString().slice(0,10)
       }));
+      populateLeaveEmpSelect();
       renderAll();
     });
   }
@@ -275,6 +338,13 @@
     fetch('/attendance/today').then(r=>r.json()).then(data=>{
       attendanceToday = data;
       renderAttendance();
+    });
+  }
+
+  function loadLeaves(){
+    fetch('/leaves').then(r=>r.json()).then(data=>{
+      leaves = data;
+      renderLeaves();
     });
   }
 
@@ -303,24 +373,39 @@
   const confirmText=document.getElementById('confirmText');
   const employeesView=document.getElementById('employeesView');
   const attendanceView=document.getElementById('attendanceView');
+  const leavesView=document.getElementById('leavesView');
   const tabEmployees=document.getElementById('tabEmployees');
   const tabAttendance=document.getElementById('tabAttendance');
+  const tabLeaves=document.getElementById('tabLeaves');
   const employeesActions=document.getElementById('employeesActions');
+  const leavesActions=document.getElementById('leavesActions');
   const attDate=document.getElementById('attDate');
   const attSummary=document.getElementById('attSummary');
   const attList=document.getElementById('attList');
+  const leaveSummary=document.getElementById('leaveSummary');
+  const leaveList=document.getElementById('leaveList');
+  const leaveModalOverlay=document.getElementById('leaveModalOverlay');
+  const leaveModalCard=document.getElementById('leaveModalCard');
+  const leaveForm=document.getElementById('leaveForm');
+  const leaveEmp=document.getElementById('leaveEmp');
+  const leaveType=document.getElementById('leaveType');
+  const leaveStart=document.getElementById('leaveStart');
+  const leaveEnd=document.getElementById('leaveEnd');
+  const leaveReason=document.getElementById('leaveReason');
+  const leaveFormError=document.getElementById('leaveFormError');
 
-  tabEmployees.addEventListener('click',()=>{
-    tabEmployees.classList.add('active');tabAttendance.classList.remove('active');
-    employeesView.classList.add('active');attendanceView.classList.remove('active');
-    employeesActions.style.display='flex';
-  });
-  tabAttendance.addEventListener('click',()=>{
-    tabAttendance.classList.add('active');tabEmployees.classList.remove('active');
-    attendanceView.classList.add('active');employeesView.classList.remove('active');
+  function switchTab(tab){
+    [tabEmployees,tabAttendance,tabLeaves].forEach(t=>t.classList.remove('active'));
+    [employeesView,attendanceView,leavesView].forEach(v=>v.classList.remove('active'));
     employeesActions.style.display='none';
-    loadAttendanceToday();
-  });
+    leavesActions.style.display='none';
+    if(tab==='employees'){tabEmployees.classList.add('active');employeesView.classList.add('active');employeesActions.style.display='flex';}
+    if(tab==='attendance'){tabAttendance.classList.add('active');attendanceView.classList.add('active');loadAttendanceToday();}
+    if(tab==='leaves'){tabLeaves.classList.add('active');leavesView.classList.add('active');leavesActions.style.display='flex';loadLeaves();}
+  }
+  tabEmployees.addEventListener('click',()=>switchTab('employees'));
+  tabAttendance.addEventListener('click',()=>switchTab('attendance'));
+  tabLeaves.addEventListener('click',()=>switchTab('leaves'));
 
   function deptColor(dept){
     let hash=0;
@@ -406,7 +491,6 @@
   function renderAttendance(){
     const today=new Date();
     attDate.textContent=today.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
     const counts={Present:0,Absent:0,'Half-day':0,Unmarked:0};
     attendanceToday.forEach(a=>{counts[a.status]=(counts[a.status]||0)+1;});
     attSummary.innerHTML=`
@@ -415,7 +499,6 @@
       <span class="att-pill half">Half-day ${counts['Half-day']}</span>
       <span class="att-pill unmarked">Unmarked ${counts.Unmarked}</span>
     `;
-
     attList.innerHTML=attendanceToday.map((a,i)=>{
       const emp=employees.find(e=>e.id===String(a.employee_id));
       const color=emp?deptColor(emp.dept):{bg:'#F1F2FA',fg:'#6B7280'};
@@ -434,11 +517,8 @@
         </div>
       </div>`;
     }).join('');
-
     attList.querySelectorAll('.att-btn').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        markAttendance(btn.dataset.id,btn.dataset.status);
-      });
+      btn.addEventListener('click',()=>markAttendance(btn.dataset.id,btn.dataset.status));
     });
   }
 
@@ -449,12 +529,92 @@
       body:JSON.stringify({employee_id:parseInt(employeeId),status:status})
     })
     .then(r=>r.json())
-    .then(()=>{
-      showToast(`Marked ${status}.`,'success');
-      loadAttendanceToday();
-    })
+    .then(()=>{showToast(`Marked ${status}.`,'success');loadAttendanceToday();})
     .catch(()=>showToast('Error marking attendance.','danger'));
   }
+
+  function renderLeaves(){
+    const counts={Pending:0,Approved:0,Rejected:0};
+    leaves.forEach(l=>{counts[l.status]=(counts[l.status]||0)+1;});
+    leaveSummary.innerHTML=`
+      <span class="att-pill pending">Pending ${counts.Pending}</span>
+      <span class="att-pill approved">Approved ${counts.Approved}</span>
+      <span class="att-pill rejected">Rejected ${counts.Rejected}</span>
+    `;
+    if(leaves.length===0){
+      leaveList.innerHTML=`<div class="empty-state show"><h3>No leave requests yet</h3><p>Click "Apply Leave" to submit one.</p></div>`;
+      return;
+    }
+    leaveList.innerHTML=leaves.map((l,i)=>{
+      const statusClass=l.status.toLowerCase();
+      const actions=l.status==='Pending'?`
+        <div class="leave-actions">
+          <button class="btn btn-success btn-sm" data-action="approve" data-id="${l.id}">Approve</button>
+          <button class="btn btn-danger btn-sm" data-action="reject" data-id="${l.id}">Reject</button>
+        </div>`:'';
+      return `<div class="leave-card" style="--i:${i}">
+        <div class="leave-top">
+          <div><span class="leave-emp">${escapeHtml(l.employee_name)}</span><span class="leave-type-tag">${escapeHtml(l.leave_type)}</span></div>
+          <span class="att-pill ${statusClass}">${escapeHtml(l.status)}</span>
+        </div>
+        <div class="leave-dates">${formatDate(l.start_date)} → ${formatDate(l.end_date)}</div>
+        ${l.reason?`<div class="leave-reason">${escapeHtml(l.reason)}</div>`:''}
+        ${actions}
+      </div>`;
+    }).join('');
+    leaveList.querySelectorAll('[data-action="approve"]').forEach(btn=>btn.addEventListener('click',()=>updateLeaveStatus(btn.dataset.id,'Approved')));
+    leaveList.querySelectorAll('[data-action="reject"]').forEach(btn=>btn.addEventListener('click',()=>updateLeaveStatus(btn.dataset.id,'Rejected')));
+  }
+
+  function updateLeaveStatus(id,status){
+    fetch(`/leave/${id}/status`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({status:status})
+    })
+    .then(r=>r.json())
+    .then(()=>{showToast(`Leave ${status.toLowerCase()}.`,status==='Approved'?'success':'danger');loadLeaves();})
+    .catch(()=>showToast('Error updating leave.','danger'));
+  }
+
+  document.getElementById('applyLeaveBtn').addEventListener('click',()=>{
+    leaveForm.reset();leaveFormError.textContent='';leaveModalOverlay.hidden=false;
+  });
+  document.getElementById('leaveModalClose').addEventListener('click',()=>leaveModalOverlay.hidden=true);
+  document.getElementById('leaveCancelBtn').addEventListener('click',()=>leaveModalOverlay.hidden=true);
+  leaveModalOverlay.addEventListener('click',e=>{if(e.target===leaveModalOverlay)leaveModalOverlay.hidden=true;});
+
+  leaveForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    const empId=leaveEmp.value;
+    const type=leaveType.value;
+    const start=leaveStart.value;
+    const end=leaveEnd.value;
+    const reason=leaveReason.value.trim();
+    leaveFormError.textContent='';
+    if(!empId||!start||!end){
+      leaveFormError.textContent='Employee, start date, and end date are required.';
+      leaveModalCard.classList.add('shake');
+      setTimeout(()=>leaveModalCard.classList.remove('shake'),350);
+      return;
+    }
+    if(new Date(end)<new Date(start)){
+      leaveFormError.textContent='End date cannot be before start date.';
+      return;
+    }
+    fetch('/leave',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({employee_id:parseInt(empId),leave_type:type,start_date:start,end_date:end,reason:reason})
+    })
+    .then(r=>r.json())
+    .then(()=>{
+      showToast('Leave request submitted.','success');
+      leaveModalOverlay.hidden=true;
+      loadLeaves();
+    })
+    .catch(()=>showToast('Error submitting leave.','danger'));
+  });
 
   function openModal(mode,id){
     editingId=mode==='edit'?id:null;
@@ -552,7 +712,7 @@
     renderAll();
   });
   confirmOverlay.addEventListener('click',e=>{if(e.target===confirmOverlay)confirmOverlay.hidden=true;});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();confirmOverlay.hidden=true;}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();confirmOverlay.hidden=true;leaveModalOverlay.hidden=true;}});
   searchInput.addEventListener('input',e=>{searchTerm=e.target.value;renderGrid();});
   sortSelect.addEventListener('change',e=>{sortMode=e.target.value;renderGrid();});
 
