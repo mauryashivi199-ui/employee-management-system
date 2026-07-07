@@ -24,17 +24,29 @@
   @keyframes floatA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(60px,40px) scale(1.08);}}
   @keyframes floatB{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-50px,-30px) scale(1.1);}}
   @keyframes floatC{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-30px,50px) scale(.94);}}
-  .app{max-width:1140px;margin:0 auto;padding:36px 24px 80px;position:relative;z-index:1;}
+  .app{max-width:1140px;margin:0 auto;padding:36px 24px 80px;position:relative;z-index:1;display:none;}
+  .app.show{display:block;}
+  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;padding:20px;}
+  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px 36px;width:100%;max-width:380px;box-shadow:0 30px 70px rgba(30,30,70,.15);animation:modalIn .35s cubic-bezier(.2,.8,.2,1) both;}
+  .login-brand{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:28px;}
+  .login-brand .brand-mark{width:56px;height:56px;font-size:19px;}
+  .login-brand h1{font-family:var(--font-display);font-size:22px;font-weight:600;margin:0;}
+  .login-brand p{margin:2px 0 0;font-size:13px;color:var(--text-muted);}
+  .login-error{font-size:13px;color:var(--danger);text-align:center;margin:-6px 0 14px;min-height:1px;}
+  .login-hint{margin-top:18px;font-size:12px;color:var(--text-muted);text-align:center;line-height:1.6;background:var(--surface-alt);padding:10px 12px;border-radius:10px;}
   .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px;animation:fadeSlideDown .5s cubic-bezier(.2,.8,.2,1) both;}
   @keyframes fadeSlideDown{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
   .brand{display:flex;align-items:center;gap:14px;}
   .brand-mark{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--primary),#8B7CF6);color:#fff;font-family:var(--font-display);font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;letter-spacing:.5px;box-shadow:var(--shadow-glow);}
   .brand h1{font-family:var(--font-display);font-size:23px;font-weight:600;margin:0;letter-spacing:-.3px;}
   .brand-sub{margin:2px 0 0;font-size:13px;color:var(--text-muted);}
-  .topbar-actions{display:flex;gap:10px;}
+  .topbar-actions{display:flex;gap:10px;align-items:center;}
+  .user-pill{display:flex;align-items:center;gap:8px;background:var(--surface-alt);border-radius:999px;padding:6px 14px 6px 6px;font-size:13px;font-weight:600;}
+  .user-pill .dot{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .role-tag{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:#EEF2FF;color:var(--primary);text-transform:uppercase;letter-spacing:.3px;}
   .btn{font-family:var(--font-body);font-weight:600;font-size:14px;border:none;border-radius:var(--radius-sm);padding:11px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s ease,background .18s ease;}
   .btn:active{transform:translateY(1px) scale(.97);}
-  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 6px 16px rgba(79,70,229,.28);}
+  .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 6px 16px rgba(79,70,229,.28);width:100%;justify-content:center;padding:12px 18px;}
   .btn-primary:hover{box-shadow:0 10px 26px rgba(79,70,229,.38);transform:translateY(-2px);}
   .btn-ghost{background:var(--surface);color:var(--primary);border:1px solid var(--border);}
   .btn-ghost:hover{border-color:var(--primary-light);transform:translateY(-2px);box-shadow:var(--shadow-sm);}
@@ -162,7 +174,26 @@
 <div class="bg-orb orb1"></div>
 <div class="bg-orb orb2"></div>
 <div class="bg-orb orb3"></div>
-<div class="app">
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="brand-mark">EM</span>
+      <h1>Employee Management</h1>
+      <p>Sign in to continue</p>
+    </div>
+    <form id="loginForm" novalidate>
+      <div class="field"><label for="loginUsername">Username</label><input id="loginUsername" autocomplete="off"></div>
+      <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="off"></div>
+      <div class="login-error" id="loginError"></div>
+      <button type="submit" class="btn btn-primary">Sign In</button>
+    </form>
+    <div class="login-hint">Admin: admin / admin123<br>Employee: jagdeep / jagdeep123</div>
+  </div>
+</div>
+
+<div class="app" id="mainApp">
   <header class="topbar">
     <div class="brand">
       <span class="brand-mark">EM</span>
@@ -174,9 +205,23 @@
     <div class="topbar-actions" id="employeesActions">
       <button class="btn btn-ghost" id="exportBtn">Export CSV</button>
       <button class="btn btn-primary" id="addBtn">+ Add Employee</button>
+      <div class="user-pill"><span class="dot" id="userDot">A</span><span id="userNameLabel">—</span><span class="role-tag" id="userRoleTag">admin</span></div>
+      <button class="btn-icon" id="logoutBtn" title="Logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
     <div class="topbar-actions" id="leavesActions" style="display:none;">
       <button class="btn btn-primary" id="applyLeaveBtn">+ Apply Leave</button>
+      <div class="user-pill"><span class="dot" id="userDot2">A</span><span id="userNameLabel2">—</span><span class="role-tag" id="userRoleTag2">admin</span></div>
+      <button class="btn-icon" id="logoutBtn2" title="Logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="topbar-actions" id="attActions" style="display:none;">
+      <div class="user-pill"><span class="dot" id="userDot3">A</span><span id="userNameLabel3">—</span><span class="role-tag" id="userRoleTag3">admin</span></div>
+      <button class="btn-icon" id="logoutBtn3" title="Logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
   </header>
 
@@ -301,13 +346,74 @@
     {bg:'#FEF3C7',fg:'#B45309'},{bg:'#FFE4E6',fg:'#BE123C'}
   ];
 
-  let employees = [];
-  let departments = [];
-  let attendanceToday = [];
-  let leaves = [];
+  let employees = [], departments = [], attendanceToday = [], leaves = [];
+  let currentUser = null;
+
+  const loginScreen=document.getElementById('loginScreen');
+  const mainApp=document.getElementById('mainApp');
+  const loginForm=document.getElementById('loginForm');
+  const loginUsername=document.getElementById('loginUsername');
+  const loginPassword=document.getElementById('loginPassword');
+  const loginError=document.getElementById('loginError');
+
+  function checkSession(){
+    fetch('/me',{credentials:'include'}).then(r=>r.json()).then(data=>{
+      if(data.logged_in){
+        currentUser=data;
+        showApp();
+      } else {
+        loginScreen.style.display='flex';
+        mainApp.classList.remove('show');
+      }
+    });
+  }
+
+  loginForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    loginError.textContent='';
+    fetch('/login',{
+      method:'POST',
+      credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:loginUsername.value.trim(),password:loginPassword.value})
+    })
+    .then(r=>r.json().then(data=>({ok:r.ok,data})))
+    .then(({ok,data})=>{
+      if(!ok){loginError.textContent=data.error||'Login failed.';return;}
+      currentUser=data;
+      showApp();
+    })
+    .catch(()=>{loginError.textContent='Something went wrong. Try again.';});
+  });
+
+  function logout(){
+    fetch('/logout',{method:'POST',credentials:'include'}).then(()=>{
+      currentUser=null;
+      loginScreen.style.display='flex';
+      mainApp.classList.remove('show');
+      loginForm.reset();
+    });
+  }
+  document.getElementById('logoutBtn').addEventListener('click',logout);
+  document.getElementById('logoutBtn2').addEventListener('click',logout);
+  document.getElementById('logoutBtn3').addEventListener('click',logout);
+
+  function showApp(){
+    loginScreen.style.display='none';
+    mainApp.classList.add('show');
+    const initial=currentUser.username.charAt(0).toUpperCase();
+    ['userDot','userDot2','userDot3'].forEach(id=>document.getElementById(id).textContent=initial);
+    ['userNameLabel','userNameLabel2','userNameLabel3'].forEach(id=>document.getElementById(id).textContent=currentUser.username);
+    ['userRoleTag','userRoleTag2','userRoleTag3'].forEach(id=>document.getElementById(id).textContent=currentUser.role);
+
+    const isAdmin=currentUser.role==='admin';
+    document.getElementById('addBtn').style.display=isAdmin?'inline-flex':'none';
+
+    loadDepartments().then(loadEmployees);
+  }
 
   function loadDepartments(){
-    return fetch('/departments').then(r=>r.json()).then(data=>{
+    return fetch('/departments',{credentials:'include'}).then(r=>r.json()).then(data=>{
       departments = data;
       populateDeptSelect();
     });
@@ -324,7 +430,7 @@
   }
 
   function loadEmployees(){
-    return fetch('/employees').then(r=>r.json()).then(data=>{
+    return fetch('/employees',{credentials:'include'}).then(r=>r.json()).then(data=>{
       employees = data.map(e=>({
         id:String(e.id), name:e.name, dept:e.department||'Unassigned', deptId:e.department_id,
         email:e.email, joined:new Date().toISOString().slice(0,10)
@@ -335,20 +441,18 @@
   }
 
   function loadAttendanceToday(){
-    fetch('/attendance/today').then(r=>r.json()).then(data=>{
+    fetch('/attendance/today',{credentials:'include'}).then(r=>r.json()).then(data=>{
       attendanceToday = data;
       renderAttendance();
     });
   }
 
   function loadLeaves(){
-    fetch('/leaves').then(r=>r.json()).then(data=>{
+    fetch('/leaves',{credentials:'include'}).then(r=>r.json()).then(data=>{
       leaves = data;
       renderLeaves();
     });
   }
-
-  loadDepartments().then(loadEmployees);
 
   let activeDept='all', searchTerm='', sortMode='name', editingId=null, pendingDeleteId=null;
 
@@ -379,6 +483,7 @@
   const tabLeaves=document.getElementById('tabLeaves');
   const employeesActions=document.getElementById('employeesActions');
   const leavesActions=document.getElementById('leavesActions');
+  const attActions=document.getElementById('attActions');
   const attDate=document.getElementById('attDate');
   const attSummary=document.getElementById('attSummary');
   const attList=document.getElementById('attList');
@@ -399,8 +504,9 @@
     [employeesView,attendanceView,leavesView].forEach(v=>v.classList.remove('active'));
     employeesActions.style.display='none';
     leavesActions.style.display='none';
+    attActions.style.display='none';
     if(tab==='employees'){tabEmployees.classList.add('active');employeesView.classList.add('active');employeesActions.style.display='flex';}
-    if(tab==='attendance'){tabAttendance.classList.add('active');attendanceView.classList.add('active');loadAttendanceToday();}
+    if(tab==='attendance'){tabAttendance.classList.add('active');attendanceView.classList.add('active');attActions.style.display='flex';loadAttendanceToday();}
     if(tab==='leaves'){tabLeaves.classList.add('active');leavesView.classList.add('active');leavesActions.style.display='flex';loadLeaves();}
   }
   tabEmployees.addEventListener('click',()=>switchTab('employees'));
@@ -458,6 +564,7 @@
   }
 
   function renderGrid(){
+    const isAdmin=currentUser&&currentUser.role==='admin';
     const list=getFiltered();
     emptyState.classList.toggle('show',list.length===0);
     grid.style.display=list.length===0?'none':'grid';
@@ -467,12 +574,12 @@
         <div class="card-top">
           <div class="avatar" style="background:${color.bg};color:${color.fg}">${initials(e.name)}</div>
           <div class="card-actions">
-            <button class="btn-icon" title="Edit" data-action="edit" data-id="${escapeHtml(e.id)}">
+            ${isAdmin?`<button class="btn-icon" title="Edit" data-action="edit" data-id="${escapeHtml(e.id)}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
             <button class="btn-icon danger-hover" title="Remove" data-action="delete" data-id="${escapeHtml(e.id)}">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-            </button>
+            </button>`:''}
           </div>
         </div>
         <div class="card-name">${escapeHtml(e.name)}</div>
@@ -489,6 +596,7 @@
   function renderAll(){renderStats();renderChips();renderGrid();}
 
   function renderAttendance(){
+    const isAdmin=currentUser&&currentUser.role==='admin';
     const today=new Date();
     attDate.textContent=today.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     const counts={Present:0,Absent:0,'Half-day':0,Unmarked:0};
@@ -502,6 +610,11 @@
     attList.innerHTML=attendanceToday.map((a,i)=>{
       const emp=employees.find(e=>e.id===String(a.employee_id));
       const color=emp?deptColor(emp.dept):{bg:'#F1F2FA',fg:'#6B7280'};
+      const actions=isAdmin?`<div class="att-actions">
+          <button class="att-btn present-btn ${a.status==='Present'?'selected':''}" data-id="${a.employee_id}" data-status="Present">Present</button>
+          <button class="att-btn half-btn ${a.status==='Half-day'?'selected':''}" data-id="${a.employee_id}" data-status="Half-day">Half-day</button>
+          <button class="att-btn absent-btn ${a.status==='Absent'?'selected':''}" data-id="${a.employee_id}" data-status="Absent">Absent</button>
+        </div>`:'';
       return `<div class="att-row" style="--i:${i}">
         <div class="att-row-left">
           <div class="avatar" style="width:38px;height:38px;font-size:13px;background:${color.bg};color:${color.fg}">${initials(a.name)}</div>
@@ -510,11 +623,7 @@
             <div class="att-row-current">Status: ${escapeHtml(a.status)}</div>
           </div>
         </div>
-        <div class="att-actions">
-          <button class="att-btn present-btn ${a.status==='Present'?'selected':''}" data-id="${a.employee_id}" data-status="Present">Present</button>
-          <button class="att-btn half-btn ${a.status==='Half-day'?'selected':''}" data-id="${a.employee_id}" data-status="Half-day">Half-day</button>
-          <button class="att-btn absent-btn ${a.status==='Absent'?'selected':''}" data-id="${a.employee_id}" data-status="Absent">Absent</button>
-        </div>
+        ${actions}
       </div>`;
     }).join('');
     attList.querySelectorAll('.att-btn').forEach(btn=>{
@@ -525,6 +634,7 @@
   function markAttendance(employeeId,status){
     fetch('/attendance',{
       method:'POST',
+      credentials:'include',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({employee_id:parseInt(employeeId),status:status})
     })
@@ -534,6 +644,7 @@
   }
 
   function renderLeaves(){
+    const isAdmin=currentUser&&currentUser.role==='admin';
     const counts={Pending:0,Approved:0,Rejected:0};
     leaves.forEach(l=>{counts[l.status]=(counts[l.status]||0)+1;});
     leaveSummary.innerHTML=`
@@ -547,7 +658,7 @@
     }
     leaveList.innerHTML=leaves.map((l,i)=>{
       const statusClass=l.status.toLowerCase();
-      const actions=l.status==='Pending'?`
+      const actions=(isAdmin&&l.status==='Pending')?`
         <div class="leave-actions">
           <button class="btn btn-success btn-sm" data-action="approve" data-id="${l.id}">Approve</button>
           <button class="btn btn-danger btn-sm" data-action="reject" data-id="${l.id}">Reject</button>
@@ -569,6 +680,7 @@
   function updateLeaveStatus(id,status){
     fetch(`/leave/${id}/status`,{
       method:'PUT',
+      credentials:'include',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({status:status})
     })
@@ -604,6 +716,7 @@
     }
     fetch('/leave',{
       method:'POST',
+      credentials:'include',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({employee_id:parseInt(empId),leave_type:type,start_date:start,end_date:end,reason:reason})
     })
@@ -676,6 +789,7 @@
     } else {
       fetch('/employee',{
         method:'POST',
+        credentials:'include',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({name:name,email:email,department_id:parseInt(deptId)})
       })
@@ -735,6 +849,8 @@
     document.getElementById('toastContainer').appendChild(toast);
     setTimeout(()=>toast.remove(),2900);
   }
+
+  checkSession();
 })();
 </script>
 </body>
