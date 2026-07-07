@@ -1,8 +1,11 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session
 import mysql.connector
 from datetime import date
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 
 app = Flask(__name__, template_folder='templates')
+app.secret_key = 'change-this-secret-key-in-production'
 
 db = mysql.connector.connect(
     host="mysql-service",
@@ -12,11 +15,80 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
+# ---------- Auth helpers ----------
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({"error": "Login required"}), 401
+        return f(*args, **kwargs)
+    return wrapper
+
+def admin_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({"error": "Login required"}), 401
+        if session.get('role') != 'admin':
+            return jsonify({"error": "Admin access required"}), 403
+        return f(*args, **kwargs)
+    return wrapper
+
 @app.route('/')
 def home():
     return render_template('index.html')
 
+# ---------- Login / Logout / Me ----------
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+
+    cursor.execute("SELECT id, username, password, role, employee_id FROM users WHERE username = %s", (username,))
+    row = cursor.fetchone()
+
+    if not row:
+        return jsonify({"error": "Invalid username or password"}), 401
+
+    user_id, uname, stored_password, role, employee_id = row
+
+    # Support both plain-text (seed data) and hashed passwords
+    valid = False
+    if stored_password.startswith('pbkdf2:') or stored_password.startswith('scrypt:'):
+        valid = check_password_hash(stored_password, password)
+    else:
+        valid = (stored_password == password)
+
+    if not valid:
+        return jsonify({"error": "Invalid username or password"}), 401
+
+    session['user_id'] = user_id
+    session['username'] = uname
+    session['role'] = role
+    session['employee_id'] = employee_id
+
+    return jsonify({"username": uname, "role": role, "employee_id": employee_id}), 200
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({"message": "Logged out"}), 200
+
+@app.route('/me', methods=['GET'])
+def me():
+    if 'user_id' not in session:
+        return jsonify({"logged_in": False}), 200
+    return jsonify({
+        "logged_in": True,
+        "username": session.get('username'),
+        "role": session.get('role'),
+        "employee_id": session.get('employee_id')
+    }), 200
+
+# ---------- Employees ----------
 @app.route('/employee', methods=['POST'])
+@admin_required
 def add_employee():
     data = request.get_json()
     name = data['name']
@@ -29,6 +101,7 @@ def add_employee():
     return jsonify({"message": "Employee added successfully"}), 201
 
 @app.route('/employees', methods=['GET'])
+@login_required
 def get_employees():
     cursor.execute("""
         SELECT e.id, e.name, e.email, e.department_id, d.name AS department_name
@@ -48,13 +121,16 @@ def get_employees():
     return jsonify(result)
 
 @app.route('/departments', methods=['GET'])
+@login_required
 def get_departments():
     cursor.execute("SELECT id, name FROM departments")
     rows = cursor.fetchall()
     result = [{"id": row[0], "name": row[1]} for row in rows]
     return jsonify(result)
 
+# ---------- Attendance ----------
 @app.route('/attendance', methods=['POST'])
+@admin_required
 def mark_attendance():
     data = request.get_json()
     employee_id = data['employee_id']
@@ -71,6 +147,7 @@ def mark_attendance():
     return jsonify({"message": "Attendance marked successfully"}), 201
 
 @app.route('/attendance', methods=['GET'])
+@login_required
 def get_attendance():
     cursor.execute("""
         SELECT a.id, a.employee_id, e.name, a.date, a.status
@@ -91,6 +168,7 @@ def get_attendance():
     return jsonify(result)
 
 @app.route('/attendance/<int:employee_id>', methods=['GET'])
+@login_required
 def get_employee_attendance(employee_id):
     cursor.execute("""
         SELECT id, date, status FROM attendance
@@ -101,6 +179,7 @@ def get_employee_attendance(employee_id):
     return jsonify(result)
 
 @app.route('/attendance/today', methods=['GET'])
+@login_required
 def get_today_attendance():
     today = str(date.today())
     cursor.execute("""
@@ -118,8 +197,9 @@ def get_today_attendance():
         })
     return jsonify(result)
 
-# Apply for leave
+# ---------- Leaves ----------
 @app.route('/leave', methods=['POST'])
+@login_required
 def apply_leave():
     data = request.get_json()
     employee_id = data['employee_id']
@@ -136,8 +216,8 @@ def apply_leave():
     db.commit()
     return jsonify({"message": "Leave applied successfully"}), 201
 
-# Get all leave requests (with employee name)
 @app.route('/leaves', methods=['GET'])
+@login_required
 def get_leaves():
     cursor.execute("""
         SELECT l.id, l.employee_id, e.name, l.leave_type, l.start_date, l.end_date,
@@ -162,8 +242,8 @@ def get_leaves():
         })
     return jsonify(result)
 
-# Get leave history for one employee
 @app.route('/leaves/<int:employee_id>', methods=['GET'])
+@login_required
 def get_employee_leaves(employee_id):
     cursor.execute("""
         SELECT id, leave_type, start_date, end_date, reason, status, applied_at
@@ -183,11 +263,11 @@ def get_employee_leaves(employee_id):
         })
     return jsonify(result)
 
-# Approve or reject a leave request
 @app.route('/leave/<int:leave_id>/status', methods=['PUT'])
+@admin_required
 def update_leave_status(leave_id):
     data = request.get_json()
-    new_status = data['status']  # Approved or Rejected
+    new_status = data['status']
 
     cursor.execute("UPDATE leaves SET status = %s WHERE id = %s", (new_status, leave_id))
     db.commit()
