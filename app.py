@@ -15,7 +15,6 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor()
 
-# ---------- Auth helpers ----------
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -38,7 +37,6 @@ def admin_required(f):
 def home():
     return render_template('index.html')
 
-# ---------- Login / Logout / Me ----------
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -53,7 +51,6 @@ def login():
 
     user_id, uname, stored_password, role, employee_id = row
 
-    # Support both plain-text (seed data) and hashed passwords
     valid = False
     if stored_password.startswith('pbkdf2:') or stored_password.startswith('scrypt:'):
         valid = check_password_hash(stored_password, password)
@@ -86,7 +83,6 @@ def me():
         "employee_id": session.get('employee_id')
     }), 200
 
-# ---------- Employees ----------
 @app.route('/employee', methods=['POST'])
 @admin_required
 def add_employee():
@@ -103,11 +99,23 @@ def add_employee():
 @app.route('/employees', methods=['GET'])
 @login_required
 def get_employees():
-    cursor.execute("""
-        SELECT e.id, e.name, e.email, e.department_id, d.name AS department_name
-        FROM employees e
-        LEFT JOIN departments d ON e.department_id = d.id
-    """)
+    role = session.get('role')
+    emp_id = session.get('employee_id')
+
+    if role == 'employee' and emp_id:
+        cursor.execute("""
+            SELECT e.id, e.name, e.email, e.department_id, d.name AS department_name
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.id
+            WHERE e.id = %s
+        """, (emp_id,))
+    else:
+        cursor.execute("""
+            SELECT e.id, e.name, e.email, e.department_id, d.name AS department_name
+            FROM employees e
+            LEFT JOIN departments d ON e.department_id = d.id
+        """)
+
     rows = cursor.fetchall()
     result = []
     for row in rows:
@@ -128,7 +136,6 @@ def get_departments():
     result = [{"id": row[0], "name": row[1]} for row in rows]
     return jsonify(result)
 
-# ---------- Attendance ----------
 @app.route('/attendance', methods=['POST'])
 @admin_required
 def mark_attendance():
@@ -149,12 +156,25 @@ def mark_attendance():
 @app.route('/attendance', methods=['GET'])
 @login_required
 def get_attendance():
-    cursor.execute("""
-        SELECT a.id, a.employee_id, e.name, a.date, a.status
-        FROM attendance a
-        JOIN employees e ON a.employee_id = e.id
-        ORDER BY a.date DESC
-    """)
+    role = session.get('role')
+    emp_id = session.get('employee_id')
+
+    if role == 'employee' and emp_id:
+        cursor.execute("""
+            SELECT a.id, a.employee_id, e.name, a.date, a.status
+            FROM attendance a
+            JOIN employees e ON a.employee_id = e.id
+            WHERE a.employee_id = %s
+            ORDER BY a.date DESC
+        """, (emp_id,))
+    else:
+        cursor.execute("""
+            SELECT a.id, a.employee_id, e.name, a.date, a.status
+            FROM attendance a
+            JOIN employees e ON a.employee_id = e.id
+            ORDER BY a.date DESC
+        """)
+
     rows = cursor.fetchall()
     result = []
     for row in rows:
@@ -170,6 +190,12 @@ def get_attendance():
 @app.route('/attendance/<int:employee_id>', methods=['GET'])
 @login_required
 def get_employee_attendance(employee_id):
+    role = session.get('role')
+    emp_id = session.get('employee_id')
+
+    if role == 'employee' and emp_id != employee_id:
+        return jsonify({"error": "Access denied"}), 403
+
     cursor.execute("""
         SELECT id, date, status FROM attendance
         WHERE employee_id = %s ORDER BY date DESC
@@ -181,12 +207,24 @@ def get_employee_attendance(employee_id):
 @app.route('/attendance/today', methods=['GET'])
 @login_required
 def get_today_attendance():
+    role = session.get('role')
+    emp_id = session.get('employee_id')
     today = str(date.today())
-    cursor.execute("""
-        SELECT e.id, e.name, a.status
-        FROM employees e
-        LEFT JOIN attendance a ON e.id = a.employee_id AND a.date = %s
-    """, (today,))
+
+    if role == 'employee' and emp_id:
+        cursor.execute("""
+            SELECT e.id, e.name, a.status
+            FROM employees e
+            LEFT JOIN attendance a ON e.id = a.employee_id AND a.date = %s
+            WHERE e.id = %s
+        """, (today, emp_id))
+    else:
+        cursor.execute("""
+            SELECT e.id, e.name, a.status
+            FROM employees e
+            LEFT JOIN attendance a ON e.id = a.employee_id AND a.date = %s
+        """, (today,))
+
     rows = cursor.fetchall()
     result = []
     for row in rows:
@@ -197,12 +235,18 @@ def get_today_attendance():
         })
     return jsonify(result)
 
-# ---------- Leaves ----------
 @app.route('/leave', methods=['POST'])
 @login_required
 def apply_leave():
     data = request.get_json()
+    role = session.get('role')
+    session_emp_id = session.get('employee_id')
+
     employee_id = data['employee_id']
+    # Employees can only apply leave for themselves
+    if role == 'employee' and session_emp_id != employee_id:
+        return jsonify({"error": "You can only apply leave for yourself"}), 403
+
     leave_type = data.get('leave_type', 'Casual')
     start_date = data['start_date']
     end_date = data['end_date']
@@ -219,13 +263,27 @@ def apply_leave():
 @app.route('/leaves', methods=['GET'])
 @login_required
 def get_leaves():
-    cursor.execute("""
-        SELECT l.id, l.employee_id, e.name, l.leave_type, l.start_date, l.end_date,
-               l.reason, l.status, l.applied_at
-        FROM leaves l
-        JOIN employees e ON l.employee_id = e.id
-        ORDER BY l.applied_at DESC
-    """)
+    role = session.get('role')
+    emp_id = session.get('employee_id')
+
+    if role == 'employee' and emp_id:
+        cursor.execute("""
+            SELECT l.id, l.employee_id, e.name, l.leave_type, l.start_date, l.end_date,
+                   l.reason, l.status, l.applied_at
+            FROM leaves l
+            JOIN employees e ON l.employee_id = e.id
+            WHERE l.employee_id = %s
+            ORDER BY l.applied_at DESC
+        """, (emp_id,))
+    else:
+        cursor.execute("""
+            SELECT l.id, l.employee_id, e.name, l.leave_type, l.start_date, l.end_date,
+                   l.reason, l.status, l.applied_at
+            FROM leaves l
+            JOIN employees e ON l.employee_id = e.id
+            ORDER BY l.applied_at DESC
+        """)
+
     rows = cursor.fetchall()
     result = []
     for row in rows:
@@ -245,6 +303,12 @@ def get_leaves():
 @app.route('/leaves/<int:employee_id>', methods=['GET'])
 @login_required
 def get_employee_leaves(employee_id):
+    role = session.get('role')
+    emp_id = session.get('employee_id')
+
+    if role == 'employee' and emp_id != employee_id:
+        return jsonify({"error": "Access denied"}), 403
+
     cursor.execute("""
         SELECT id, leave_type, start_date, end_date, reason, status, applied_at
         FROM leaves WHERE employee_id = %s ORDER BY applied_at DESC
