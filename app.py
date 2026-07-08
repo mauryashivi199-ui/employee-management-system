@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template, session
 import mysql.connector
-from datetime import date
+from datetime import date, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
@@ -243,7 +243,6 @@ def apply_leave():
     session_emp_id = session.get('employee_id')
 
     employee_id = data['employee_id']
-    # Employees can only apply leave for themselves
     if role == 'employee' and session_emp_id != employee_id:
         return jsonify({"error": "You can only apply leave for yourself"}), 403
 
@@ -336,6 +335,62 @@ def update_leave_status(leave_id):
     cursor.execute("UPDATE leaves SET status = %s WHERE id = %s", (new_status, leave_id))
     db.commit()
     return jsonify({"message": f"Leave {new_status.lower()} successfully"}), 200
+
+@app.route('/dashboard/stats', methods=['GET'])
+@admin_required
+def dashboard_stats():
+    cursor.execute("SELECT COUNT(*) FROM employees")
+    total_employees = cursor.fetchone()[0]
+
+    today = date.today()
+    cursor.execute("SELECT COUNT(*) FROM attendance WHERE date = %s AND status = 'Present'", (today,))
+    present_today = cursor.fetchone()[0]
+    present_pct = round((present_today / total_employees) * 100) if total_employees else 0
+
+    cursor.execute("SELECT COUNT(*) FROM leaves WHERE status = 'Pending'")
+    pending_leaves = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT COUNT(*) FROM leaves
+        WHERE status = 'Approved' AND MONTH(applied_at) = MONTH(CURDATE()) AND YEAR(applied_at) = YEAR(CURDATE())
+    """)
+    approved_this_month = cursor.fetchone()[0]
+
+    trend = []
+    for i in range(6, -1, -1):
+        d = today - timedelta(days=i)
+        cursor.execute("SELECT COUNT(*) FROM attendance WHERE date = %s AND status = 'Present'", (d,))
+        present_count = cursor.fetchone()[0]
+        pct = round((present_count / total_employees) * 100) if total_employees else 0
+        trend.append({"date": str(d), "day": d.strftime('%a'), "percent": pct})
+
+    cursor.execute("""
+        SELECT leave_type, COUNT(*) FROM leaves
+        WHERE MONTH(start_date) = MONTH(CURDATE()) AND YEAR(start_date) = YEAR(CURDATE())
+        GROUP BY leave_type
+    """)
+    leave_rows = cursor.fetchall()
+    leave_by_type = {row[0]: row[1] for row in leave_rows}
+    for lt in ['Sick', 'Casual', 'Paid']:
+        leave_by_type.setdefault(lt, 0)
+
+    cursor.execute("""
+        SELECT d.name, COUNT(e.id) FROM departments d
+        LEFT JOIN employees e ON e.department_id = d.id
+        GROUP BY d.id, d.name
+    """)
+    dept_rows = cursor.fetchall()
+    dept_breakdown = [{"department": row[0], "count": row[1]} for row in dept_rows]
+
+    return jsonify({
+        "total_employees": total_employees,
+        "present_today_pct": present_pct,
+        "pending_leaves": pending_leaves,
+        "approved_this_month": approved_this_month,
+        "attendance_trend": trend,
+        "leave_by_type": leave_by_type,
+        "dept_breakdown": dept_breakdown
+    })
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
