@@ -146,6 +146,18 @@
   .dash-legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:10px;font-size:12px;color:var(--text-muted);}
   .dash-legend span{display:flex;align-items:center;gap:6px;}
   .dash-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .salary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;margin-bottom:12px;animation:cardIn .4s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 45ms);transition:box-shadow .2s ease,transform .2s ease;}
+  .salary-card:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px);}
+  .salary-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .salary-emp{font-weight:700;font-size:15px;}
+  .salary-month{font-size:12px;color:var(--text-muted);background:var(--surface-alt);padding:3px 10px;border-radius:999px;font-weight:600;}
+  .salary-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .salary-item{background:var(--surface-alt);border-radius:10px;padding:10px 12px;}
+  .salary-item-label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;}
+  .salary-item-value{font-size:15px;font-weight:700;margin-top:4px;}
+  .salary-item.net{background:#ECFDF5;}
+  .salary-item.net .salary-item-value{color:#0C9A70;}
+  .salary-item.ded .salary-item-value{color:var(--danger);}
   .modal-overlay{position:fixed;inset:0;background:rgba(29,35,51,.45);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;animation:overlayIn .2s ease forwards;padding:20px;}
   .modal-overlay[hidden]{display:none !important;}
   @keyframes overlayIn{to{opacity:1;}}
@@ -173,7 +185,7 @@
   .toast.danger{background:linear-gradient(135deg,var(--danger),#D93A5F);box-shadow:0 14px 32px rgba(239,71,111,.3);}
   @keyframes toastIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
   @keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(30px);}}
-  @media(max-width:680px){.stats{grid-template-columns:1fr 1fr;}.topbar-actions{width:100%;}.btn{flex:1;justify-content:center;}.att-row{flex-direction:column;align-items:flex-start;}.field-row{grid-template-columns:1fr;}}
+  @media(max-width:680px){.stats{grid-template-columns:1fr 1fr;}.topbar-actions{width:100%;}.btn{flex:1;justify-content:center;}.att-row{flex-direction:column;align-items:flex-start;}.field-row{grid-template-columns:1fr;}.salary-breakdown{grid-template-columns:1fr 1fr;}}
   @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}.bg-orb{display:none;}}
 </style>
 </head>
@@ -234,12 +246,20 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
+    <div class="topbar-actions" id="salaryActions" style="display:none;">
+      <button class="btn btn-primary" id="setSalaryBtn" style="display:none;">+ Set Salary</button>
+      <div class="user-pill"><span class="dot" id="userDot5">A</span><span id="userNameLabel5">—</span><span class="role-tag" id="userRoleTag5">admin</span></div>
+      <button class="btn-icon" id="logoutBtn5" title="Logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
   </header>
 
   <div class="nav-tabs">
     <button class="nav-tab active" id="tabEmployees">Employees</button>
     <button class="nav-tab" id="tabAttendance">Attendance</button>
     <button class="nav-tab" id="tabLeaves">Leaves</button>
+    <button class="nav-tab" id="tabSalary">Salary</button>
     <button class="nav-tab" id="tabDashboard" style="display:none;">Dashboard</button>
   </div>
 
@@ -285,25 +305,32 @@
     <div id="leaveList"></div>
   </div>
 
+  <div class="view" id="salaryView">
+    <div class="att-header">
+      <div class="att-date">Salary</div>
+    </div>
+    <div id="salaryList"></div>
+  </div>
+
   <div class="view" id="dashboardView">
     <section class="stats" id="dashStats"></section>
     <div class="dash-chart-card">
       <p class="dash-section-title">Attendance trend, last 7 days</p>
       <div style="position:relative;width:100%;height:220px;">
-        <canvas id="attTrendChart" role="img" aria-label="Line chart of daily attendance percentage over the last 7 days"></canvas>
+        <canvas id="attTrendChart"></canvas>
       </div>
     </div>
     <div class="dash-chart-card">
       <p class="dash-section-title">Leaves by type, this month</p>
       <div class="dash-legend" id="leaveLegend"></div>
       <div style="position:relative;width:100%;height:200px;">
-        <canvas id="leaveTypeChart" role="img" aria-label="Bar chart of leave counts by type this month"></canvas>
+        <canvas id="leaveTypeChart"></canvas>
       </div>
     </div>
     <div class="dash-chart-card">
       <p class="dash-section-title">Employees by department</p>
       <div style="position:relative;width:100%;height:220px;">
-        <canvas id="deptChart" role="img" aria-label="Bar chart of employee count by department"></canvas>
+        <canvas id="deptChart"></canvas>
       </div>
     </div>
   </div>
@@ -354,6 +381,34 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="salaryModalOverlay" hidden>
+  <div class="modal" id="salaryModalCard">
+    <button class="modal-close" id="salaryModalClose" aria-label="Close">&times;</button>
+    <h2>Set Salary</h2>
+    <form id="salaryForm" novalidate>
+      <div class="field"><label for="salaryEmp">Employee</label><select id="salaryEmp"><option value="">Select employee</option></select></div>
+      <div class="field"><label for="salaryMonth">Effective Month</label><input type="month" id="salaryMonth"></div>
+      <div class="field-row">
+        <div class="field"><label for="salaryBasic">Basic Salary (₹)</label><input type="number" id="salaryBasic" min="0" step="100"></div>
+        <div class="field"><label for="salaryHra">HRA (₹)</label><input type="number" id="salaryHra" min="0" step="100"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="salaryAllowances">Other Allowances (₹)</label><input type="number" id="salaryAllowances" min="0" step="100"></div>
+        <div class="field"><label for="salaryDeductions">Deductions (₹)</label><input type="number" id="salaryDeductions" min="0" step="100"></div>
+      </div>
+      <div class="field" style="background:var(--surface-alt);padding:12px;border-radius:10px;">
+        <label style="margin-bottom:2px;">Net Salary</label>
+        <div id="salaryNetPreview" style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--accent-dark);">₹0</div>
+      </div>
+      <div class="form-error" id="salaryFormError"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="salaryCancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Salary</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="modal-overlay" id="confirmOverlay" hidden>
   <div class="modal modal-sm">
     <h3>Remove employee?</h3>
@@ -375,7 +430,7 @@
     {bg:'#FEF3C7',fg:'#B45309'},{bg:'#FFE4E6',fg:'#BE123C'}
   ];
 
-  let employees=[], departments=[], attendanceToday=[], leaves=[];
+  let employees=[], departments=[], attendanceToday=[], leaves=[], salaries=[];
   let currentUser=null;
   let charts={};
 
@@ -417,22 +472,20 @@
       loginForm.reset();
     });
   }
-  document.getElementById('logoutBtn').addEventListener('click',logout);
-  document.getElementById('logoutBtn2').addEventListener('click',logout);
-  document.getElementById('logoutBtn3').addEventListener('click',logout);
-  document.getElementById('logoutBtn4').addEventListener('click',logout);
+  ['logoutBtn','logoutBtn2','logoutBtn3','logoutBtn4','logoutBtn5'].forEach(id=>document.getElementById(id).addEventListener('click',logout));
 
   function showApp(){
     loginScreen.style.display='none';
     mainApp.classList.add('show');
     const initial=currentUser.username.charAt(0).toUpperCase();
-    ['userDot','userDot2','userDot3','userDot4'].forEach(id=>document.getElementById(id).textContent=initial);
-    ['userNameLabel','userNameLabel2','userNameLabel3','userNameLabel4'].forEach(id=>document.getElementById(id).textContent=currentUser.username);
-    ['userRoleTag','userRoleTag2','userRoleTag3','userRoleTag4'].forEach(id=>document.getElementById(id).textContent=currentUser.role);
+    ['userDot','userDot2','userDot3','userDot4','userDot5'].forEach(id=>document.getElementById(id).textContent=initial);
+    ['userNameLabel','userNameLabel2','userNameLabel3','userNameLabel4','userNameLabel5'].forEach(id=>document.getElementById(id).textContent=currentUser.username);
+    ['userRoleTag','userRoleTag2','userRoleTag3','userRoleTag4','userRoleTag5'].forEach(id=>document.getElementById(id).textContent=currentUser.role);
 
     const isAdmin=currentUser.role==='admin';
     document.getElementById('addBtn').style.display=isAdmin?'inline-flex':'none';
     document.getElementById('tabDashboard').style.display=isAdmin?'inline-flex':'none';
+    document.getElementById('setSalaryBtn').style.display=isAdmin?'inline-flex':'none';
 
     loadDepartments().then(loadEmployees);
   }
@@ -448,6 +501,8 @@
   }
   function populateLeaveEmpSelect(){
     leaveEmp.innerHTML='<option value="">Select employee</option>'+
+      employees.map(e=>`<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
+    salaryEmp.innerHTML='<option value="">Select employee</option>'+
       employees.map(e=>`<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('');
   }
   function loadEmployees(){
@@ -472,6 +527,15 @@
   }
   function loadDashboard(){
     fetch('/dashboard/stats',{credentials:'include'}).then(r=>r.json()).then(renderDashboard);
+  }
+  function loadSalaries(){
+    const isAdmin=currentUser&&currentUser.role==='admin';
+    const url=isAdmin?'/salary':`/salary/${currentUser.employee_id}`;
+    fetch(url,{credentials:'include'}).then(r=>r.json()).then(data=>{
+      if(isAdmin){salaries=data;}
+      else{salaries=data.map(s=>({...s,employee_name:currentUser.username}));}
+      renderSalary();
+    });
   }
 
   let activeDept='all',searchTerm='',sortMode='name',editingId=null,pendingDeleteId=null;
@@ -498,20 +562,24 @@
   const employeesView=document.getElementById('employeesView');
   const attendanceView=document.getElementById('attendanceView');
   const leavesView=document.getElementById('leavesView');
+  const salaryView=document.getElementById('salaryView');
   const dashboardView=document.getElementById('dashboardView');
   const tabEmployees=document.getElementById('tabEmployees');
   const tabAttendance=document.getElementById('tabAttendance');
   const tabLeaves=document.getElementById('tabLeaves');
+  const tabSalary=document.getElementById('tabSalary');
   const tabDashboard=document.getElementById('tabDashboard');
   const employeesActions=document.getElementById('employeesActions');
   const leavesActions=document.getElementById('leavesActions');
   const attActions=document.getElementById('attActions');
   const dashActions=document.getElementById('dashActions');
+  const salaryActions=document.getElementById('salaryActions');
   const attDate=document.getElementById('attDate');
   const attSummary=document.getElementById('attSummary');
   const attList=document.getElementById('attList');
   const leaveSummary=document.getElementById('leaveSummary');
   const leaveList=document.getElementById('leaveList');
+  const salaryList=document.getElementById('salaryList');
   const leaveModalOverlay=document.getElementById('leaveModalOverlay');
   const leaveModalCard=document.getElementById('leaveModalCard');
   const leaveForm=document.getElementById('leaveForm');
@@ -521,20 +589,33 @@
   const leaveEnd=document.getElementById('leaveEnd');
   const leaveReason=document.getElementById('leaveReason');
   const leaveFormError=document.getElementById('leaveFormError');
+  const salaryModalOverlay=document.getElementById('salaryModalOverlay');
+  const salaryModalCard=document.getElementById('salaryModalCard');
+  const salaryForm=document.getElementById('salaryForm');
+  const salaryEmp=document.getElementById('salaryEmp');
+  const salaryMonth=document.getElementById('salaryMonth');
+  const salaryBasic=document.getElementById('salaryBasic');
+  const salaryHra=document.getElementById('salaryHra');
+  const salaryAllowances=document.getElementById('salaryAllowances');
+  const salaryDeductions=document.getElementById('salaryDeductions');
+  const salaryFormError=document.getElementById('salaryFormError');
+  const salaryNetPreview=document.getElementById('salaryNetPreview');
 
   function switchTab(tab){
-    [tabEmployees,tabAttendance,tabLeaves,tabDashboard].forEach(t=>t.classList.remove('active'));
-    [employeesView,attendanceView,leavesView,dashboardView].forEach(v=>v.classList.remove('active'));
+    [tabEmployees,tabAttendance,tabLeaves,tabSalary,tabDashboard].forEach(t=>t.classList.remove('active'));
+    [employeesView,attendanceView,leavesView,salaryView,dashboardView].forEach(v=>v.classList.remove('active'));
     employeesActions.style.display='none';leavesActions.style.display='none';
-    attActions.style.display='none';dashActions.style.display='none';
+    attActions.style.display='none';dashActions.style.display='none';salaryActions.style.display='none';
     if(tab==='employees'){tabEmployees.classList.add('active');employeesView.classList.add('active');employeesActions.style.display='flex';}
     if(tab==='attendance'){tabAttendance.classList.add('active');attendanceView.classList.add('active');attActions.style.display='flex';loadAttendanceToday();}
     if(tab==='leaves'){tabLeaves.classList.add('active');leavesView.classList.add('active');leavesActions.style.display='flex';loadLeaves();}
+    if(tab==='salary'){tabSalary.classList.add('active');salaryView.classList.add('active');salaryActions.style.display='flex';loadSalaries();}
     if(tab==='dashboard'){tabDashboard.classList.add('active');dashboardView.classList.add('active');dashActions.style.display='flex';loadDashboard();}
   }
   tabEmployees.addEventListener('click',()=>switchTab('employees'));
   tabAttendance.addEventListener('click',()=>switchTab('attendance'));
   tabLeaves.addEventListener('click',()=>switchTab('leaves'));
+  tabSalary.addEventListener('click',()=>switchTab('salary'));
   tabDashboard.addEventListener('click',()=>switchTab('dashboard'));
 
   function deptColor(dept){
@@ -545,6 +626,7 @@
   function initials(name){const parts=name.trim().split(/\s+/);return((parts[0]?.[0]||'')+(parts[1]?.[0]||'')).toUpperCase();}
   function formatDate(iso){const d=new Date(iso);return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}
   function escapeHtml(str){return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function formatMoney(v){return '₹'+Number(v).toLocaleString('en-IN',{maximumFractionDigits:0});}
   function animateNumber(el,to){
     const from=parseInt(el.textContent)||0;
     if(from===to){el.textContent=to;return;}
@@ -705,6 +787,76 @@
     .catch(()=>showToast('Error updating leave.','danger'));
   }
 
+  function renderSalary(){
+    if(salaries.length===0){
+      salaryList.innerHTML=`<div class="empty-state show"><h3>No salary records yet</h3><p>${currentUser&&currentUser.role==='admin'?'Click "+ Set Salary" to add one.':'Your salary hasn\\'t been set yet. Contact admin.'}</p></div>`;
+      return;
+    }
+    salaryList.innerHTML=salaries.map((s,i)=>`
+      <div class="salary-card" style="--i:${i}">
+        <div class="salary-top">
+          <span class="salary-emp">${escapeHtml(s.employee_name||'')}</span>
+          <span class="salary-month">${escapeHtml(s.effective_month)}</span>
+        </div>
+        <div class="salary-breakdown">
+          <div class="salary-item"><div class="salary-item-label">Basic</div><div class="salary-item-value">${formatMoney(s.basic_salary)}</div></div>
+          <div class="salary-item"><div class="salary-item-label">HRA</div><div class="salary-item-value">${formatMoney(s.hra)}</div></div>
+          <div class="salary-item ded"><div class="salary-item-label">Deductions</div><div class="salary-item-value">-${formatMoney(s.deductions)}</div></div>
+          <div class="salary-item net"><div class="salary-item-label">Net Salary</div><div class="salary-item-value">${formatMoney(s.net_salary)}</div></div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function updateSalaryPreview(){
+    const basic=parseFloat(salaryBasic.value)||0;
+    const hra=parseFloat(salaryHra.value)||0;
+    const allow=parseFloat(salaryAllowances.value)||0;
+    const ded=parseFloat(salaryDeductions.value)||0;
+    salaryNetPreview.textContent=formatMoney(basic+hra+allow-ded);
+  }
+  [salaryBasic,salaryHra,salaryAllowances,salaryDeductions].forEach(el=>el.addEventListener('input',updateSalaryPreview));
+
+  document.getElementById('setSalaryBtn').addEventListener('click',()=>{
+    salaryForm.reset();salaryFormError.textContent='';salaryNetPreview.textContent='₹0';
+    salaryModalOverlay.hidden=false;
+  });
+  document.getElementById('salaryModalClose').addEventListener('click',()=>salaryModalOverlay.hidden=true);
+  document.getElementById('salaryCancelBtn').addEventListener('click',()=>salaryModalOverlay.hidden=true);
+  salaryModalOverlay.addEventListener('click',e=>{if(e.target===salaryModalOverlay)salaryModalOverlay.hidden=true;});
+
+  salaryForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    const empId=salaryEmp.value;
+    const month=salaryMonth.value;
+    salaryFormError.textContent='';
+    if(!empId||!month){
+      salaryFormError.textContent='Employee and effective month are required.';
+      salaryModalCard.classList.add('shake');
+      setTimeout(()=>salaryModalCard.classList.remove('shake'),350);
+      return;
+    }
+    fetch('/salary',{
+      method:'POST',credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        employee_id:parseInt(empId),
+        basic_salary:parseFloat(salaryBasic.value)||0,
+        hra:parseFloat(salaryHra.value)||0,
+        other_allowances:parseFloat(salaryAllowances.value)||0,
+        deductions:parseFloat(salaryDeductions.value)||0,
+        effective_month:month
+      })
+    })
+    .then(r=>r.json())
+    .then(()=>{
+      showToast('Salary saved.','success');
+      salaryModalOverlay.hidden=true;
+      loadSalaries();
+    })
+    .catch(()=>showToast('Error saving salary.','danger'));
+  });
+
   function renderDashboard(stats){
     document.getElementById('dashStats').innerHTML=`
       <div class="stat-card"><span class="stat-label">Total Employees</span><span class="stat-value">${stats.total_employees}</span></div>
@@ -712,31 +864,22 @@
       <div class="stat-card"><span class="stat-label">Pending Leaves</span><span class="stat-value">${stats.pending_leaves}</span></div>
       <div class="stat-card"><span class="stat-label">Approved This Month</span><span class="stat-value">${stats.approved_this_month}</span></div>
     `;
-
     if(charts.attTrend)charts.attTrend.destroy();
     if(charts.leaveType)charts.leaveType.destroy();
     if(charts.dept)charts.dept.destroy();
-
     charts.attTrend=new Chart(document.getElementById('attTrendChart'),{
       type:'line',
-      data:{
-        labels:stats.attendance_trend.map(t=>t.day),
-        datasets:[{data:stats.attendance_trend.map(t=>t.percent),borderColor:'#1baf7a',backgroundColor:'rgba(27,175,122,0.1)',fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:'#1baf7a'}]
-      },
+      data:{labels:stats.attendance_trend.map(t=>t.day),datasets:[{data:stats.attendance_trend.map(t=>t.percent),borderColor:'#1baf7a',backgroundColor:'rgba(27,175,122,0.1)',fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:'#1baf7a'}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}
     });
-
     const leaveTypes=Object.keys(stats.leave_by_type);
     const leaveColors=['#2a78d6','#1baf7a','#eda100'];
-    document.getElementById('leaveLegend').innerHTML=leaveTypes.map((t,i)=>
-      `<span><i style="background:${leaveColors[i%3]}"></i>${escapeHtml(t)} ${stats.leave_by_type[t]}</span>`
-    ).join('');
+    document.getElementById('leaveLegend').innerHTML=leaveTypes.map((t,i)=>`<span><i style="background:${leaveColors[i%3]}"></i>${escapeHtml(t)} ${stats.leave_by_type[t]}</span>`).join('');
     charts.leaveType=new Chart(document.getElementById('leaveTypeChart'),{
       type:'bar',
       data:{labels:leaveTypes,datasets:[{data:leaveTypes.map(t=>stats.leave_by_type[t]),backgroundColor:leaveTypes.map((_,i)=>leaveColors[i%3]),borderRadius:4}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
     });
-
     charts.dept=new Chart(document.getElementById('deptChart'),{
       type:'bar',
       data:{labels:stats.dept_breakdown.map(d=>d.department),datasets:[{data:stats.dept_breakdown.map(d=>d.count),backgroundColor:'#4F46E5',borderRadius:4}]},
@@ -817,7 +960,6 @@
       setTimeout(()=>modalCard.classList.remove('shake'),350);
       return;
     }
-
     const duplicate=employees.find(e=>e.id.toLowerCase()===id.toLowerCase()&&e.id!==editingId);
     if(duplicate){
       empIdInput.classList.add('invalid');
@@ -831,7 +973,6 @@
       formError.textContent="That email address doesn't look right.";
       return;
     }
-
     if(editingId){
       const emp=employees.find(e=>e.id===editingId);
       Object.assign(emp,{id,name,dept:deptName,deptId:parseInt(deptId),email});
@@ -870,7 +1011,7 @@
     renderAll();
   });
   confirmOverlay.addEventListener('click',e=>{if(e.target===confirmOverlay)confirmOverlay.hidden=true;});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();confirmOverlay.hidden=true;leaveModalOverlay.hidden=true;}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();confirmOverlay.hidden=true;leaveModalOverlay.hidden=true;salaryModalOverlay.hidden=true;}});
   searchInput.addEventListener('input',e=>{searchTerm=e.target.value;renderGrid();});
   sortSelect.addEventListener('change',e=>{sortMode=e.target.value;renderGrid();});
 
