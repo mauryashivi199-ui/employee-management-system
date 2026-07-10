@@ -789,7 +789,7 @@
 
   function renderSalary(){
     if(salaries.length===0){
-      salaryList.innerHTML=`<div class="empty-state show"><h3>No salary records yet</h3><p>${currentUser&&currentUser.role==='admin'?'Click "+ Set Salary" to add one.':'Your salary hasn\\'t been set yet. Contact admin.'}</p></div>`;
+      salaryList.innerHTML=`<div class="empty-state show"><h3>No salary records yet</h3><p>${currentUser&&currentUser.role==='admin'?'Click "+ Set Salary" to add one.':'Your salary hasn\'t been set yet. Contact admin.'}</p></div>`;
       return;
     }
     salaryList.innerHTML=salaries.map((s,i)=>`
