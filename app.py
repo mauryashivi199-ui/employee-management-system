@@ -392,5 +392,86 @@ def dashboard_stats():
         "dept_breakdown": dept_breakdown
     })
 
+# ---------- Salary ----------
+@app.route('/salary', methods=['POST'])
+@admin_required
+def set_salary():
+    data = request.get_json()
+    employee_id = data['employee_id']
+    basic_salary = float(data.get('basic_salary', 0))
+    hra = float(data.get('hra', 0))
+    other_allowances = float(data.get('other_allowances', 0))
+    deductions = float(data.get('deductions', 0))
+    effective_month = data['effective_month']  # format: "2026-07"
+
+    net_salary = basic_salary + hra + other_allowances - deductions
+
+    sql = """
+        INSERT INTO salary (employee_id, basic_salary, hra, other_allowances, deductions, net_salary, effective_month)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            basic_salary = VALUES(basic_salary),
+            hra = VALUES(hra),
+            other_allowances = VALUES(other_allowances),
+            deductions = VALUES(deductions),
+            net_salary = VALUES(net_salary)
+    """
+    cursor.execute(sql, (employee_id, basic_salary, hra, other_allowances, deductions, net_salary, effective_month))
+    db.commit()
+    return jsonify({"message": "Salary saved successfully", "net_salary": net_salary}), 201
+
+@app.route('/salary', methods=['GET'])
+@admin_required
+def get_all_salaries():
+    cursor.execute("""
+        SELECT s.id, s.employee_id, e.name, s.basic_salary, s.hra, s.other_allowances,
+               s.deductions, s.net_salary, s.effective_month
+        FROM salary s
+        JOIN employees e ON s.employee_id = e.id
+        ORDER BY s.effective_month DESC, e.name
+    """)
+    rows = cursor.fetchall()
+    result = []
+    for row in rows:
+        result.append({
+            "id": row[0],
+            "employee_id": row[1],
+            "employee_name": row[2],
+            "basic_salary": float(row[3]),
+            "hra": float(row[4]),
+            "other_allowances": float(row[5]),
+            "deductions": float(row[6]),
+            "net_salary": float(row[7]),
+            "effective_month": row[8]
+        })
+    return jsonify(result)
+
+@app.route('/salary/<int:employee_id>', methods=['GET'])
+@login_required
+def get_employee_salary(employee_id):
+    role = session.get('role')
+    emp_id = session.get('employee_id')
+
+    if role == 'employee' and emp_id != employee_id:
+        return jsonify({"error": "Access denied"}), 403
+
+    cursor.execute("""
+        SELECT id, basic_salary, hra, other_allowances, deductions, net_salary, effective_month
+        FROM salary WHERE employee_id = %s ORDER BY effective_month DESC
+    """, (employee_id,))
+    rows = cursor.fetchall()
+    result = []
+    for row in rows:
+        result.append({
+            "id": row[0],
+            "basic_salary": float(row[1]),
+            "hra": float(row[2]),
+            "other_allowances": float(row[3]),
+            "deductions": float(row[4]),
+            "net_salary": float(row[5]),
+            "effective_month": row[6]
+        })
+    return jsonify(result)
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
