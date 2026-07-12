@@ -261,6 +261,7 @@
     <button class="nav-tab" id="tabLeaves">Leaves</button>
     <button class="nav-tab" id="tabSalary">Salary</button>
     <button class="nav-tab" id="tabDashboard" style="display:none;">Dashboard</button>
+    <button class="nav-tab" id="tabSettings">Settings</button>
   </div>
 
   <div class="view active" id="employeesView">
@@ -323,6 +324,54 @@
     <div id="salaryList"></div>
   </div>
 
+  <div class="view" id="settingsView">
+    <div style="max-width:480px;">
+      <div style="background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:20px 20px 40px;position:relative;">
+        <h2 style="margin:0;color:#fff;font-size:17px;">Settings</h2>
+        <div style="position:absolute;bottom:-30px;left:20px;display:flex;align-items:center;gap:12px;">
+          <div id="settingsAvatar" style="width:60px;height:60px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--primary-dark);border:3px solid var(--surface);box-shadow:0 0 20px rgba(168,85,247,.5);">--</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:44px 20px 24px;">
+        <div>
+          <h3 id="settingsName" style="margin:0;font-size:16px;">--</h3>
+          <span id="settingsEmail" style="font-size:12px;color:var(--text-muted);">--</span><br>
+          <span id="settingsRole" class="role-tag" style="margin-top:6px;display:inline-block;">--</span>
+        </div>
+
+        <div id="settingsSalaryBlock" style="display:none;margin-top:20px;">
+          <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin:0 0 8px 4px;font-weight:700;">Salary</p>
+          <div style="background:linear-gradient(135deg,rgba(168,85,247,.12),rgba(6,182,212,.08));border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+              <div><div style="font-size:11px;color:var(--text-muted);">Net Salary</div><div id="settingsNetSalary" style="font-size:22px;font-weight:800;color:var(--primary);">--</div></div>
+              <div id="settingsSalaryMonth" style="font-size:10.5px;background:var(--surface-alt);padding:3px 9px;border-radius:20px;color:var(--text-muted);">--</div>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:14px;">
+              <div style="flex:1;"><div style="font-size:10px;color:var(--text-muted);">Basic</div><div id="settingsBasic" style="font-size:13px;font-weight:700;">--</div></div>
+              <div style="flex:1;"><div style="font-size:10px;color:var(--text-muted);">HRA + Allow.</div><div id="settingsAllowance" style="font-size:13px;font-weight:700;color:var(--accent);">--</div></div>
+              <div style="flex:1;"><div style="font-size:10px;color:var(--text-muted);">Deductions</div><div id="settingsDeductions" style="font-size:13px;font-weight:700;color:var(--danger);">--</div></div>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin:22px 0 8px 4px;font-weight:700;">Account</p>
+        <div class="card" style="background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+          <div class="row" id="rowEditProfile" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(168,85,247,.18);color:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:16px;">👤</div>
+            <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;">Edit Profile</div><div style="font-size:11px;color:var(--text-muted);">Name, email</div></div>
+            <div style="color:var(--text-muted);">›</div>
+          </div>
+          <div class="row" id="rowChangePassword" style="display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(6,182,212,.18);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;">🔒</div>
+            <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;">Change Password</div><div style="font-size:11px;color:var(--text-muted);">Update login credentials</div></div>
+            <div style="color:var(--text-muted);">›</div>
+          </div>
+        </div>
+
+        <button id="settingsLogoutBtn" style="margin-top:22px;width:100%;padding:12px;border-radius:12px;border:1px solid rgba(239,71,111,.35);background:rgba(239,71,111,.08);color:var(--danger);font-weight:700;font-size:13px;cursor:pointer;">🚪 Log Out</button>
+      </div>
+    </div>
+  </div>
   <div class="view" id="dashboardView">
     <section class="stats" id="dashStats"></section>
     <div class="dash-chart-card">
@@ -580,6 +629,7 @@
   const tabLeaves=document.getElementById('tabLeaves');
   const tabSalary=document.getElementById('tabSalary');
   const tabDashboard=document.getElementById('tabDashboard');
+  const tabSettings=document.getElementById('tabSettings');
   const employeesActions=document.getElementById('employeesActions');
   const leavesActions=document.getElementById('leavesActions');
   const attActions=document.getElementById('attActions');
@@ -614,7 +664,7 @@
 
   function switchTab(tab){
     [tabEmployees,tabAttendance,tabLeaves,tabSalary,tabDashboard].forEach(t=>t.classList.remove('active'));
-    [employeesView,attendanceView,leavesView,salaryView,dashboardView].forEach(v=>v.classList.remove('active'));
+    [employeesView,attendanceView,leavesView,salaryView,dashboardView,document.getElementById('settingsView')].forEach(v=>v.classList.remove('active'));
     employeesActions.style.display='none';leavesActions.style.display='none';
     attActions.style.display='none';dashActions.style.display='none';salaryActions.style.display='none';
     if(tab==='employees'){tabEmployees.classList.add('active');employeesView.classList.add('active');employeesActions.style.display='flex';}
@@ -622,12 +672,14 @@
     if(tab==='leaves'){tabLeaves.classList.add('active');leavesView.classList.add('active');leavesActions.style.display='flex';loadLeaves();}
     if(tab==='salary'){tabSalary.classList.add('active');salaryView.classList.add('active');salaryActions.style.display='flex';loadSalaries();}
     if(tab==='dashboard'){tabDashboard.classList.add('active');dashboardView.classList.add('active');dashActions.style.display='flex';loadDashboard();}
+    if(tab==='settings'){tabSettings.classList.add('active');document.getElementById('settingsView').classList.add('active');loadSettingsProfile();}
   }
   tabEmployees.addEventListener('click',()=>switchTab('employees'));
   tabAttendance.addEventListener('click',()=>switchTab('attendance'));
   tabLeaves.addEventListener('click',()=>switchTab('leaves'));
   tabSalary.addEventListener('click',()=>switchTab('salary'));
   tabDashboard.addEventListener('click',()=>switchTab('dashboard'));
+  tabSettings.addEventListener('click',()=>switchTab('settings'));
 
   function deptColor(dept){
     let hash=0;
@@ -1118,6 +1170,72 @@
       gpsStatusBox.textContent = '❌ Something went wrong. Try again.';
     });
   }
+
+
+  function loadSettingsProfile(){
+    fetch('/profile',{credentials:'include'}).then(r=>r.json()).then(p=>{
+      document.getElementById('settingsAvatar').textContent=(p.name||p.username||'?').charAt(0).toUpperCase();
+      document.getElementById('settingsName').textContent=p.name||p.username;
+      document.getElementById('settingsEmail').textContent=p.email||p.username;
+      document.getElementById('settingsRole').textContent=p.role;
+      const salaryBlock=document.getElementById('settingsSalaryBlock');
+      if(p.role==='employee'&&p.employee_id){
+        salaryBlock.style.display='block';
+        fetch(`/salary/${p.employee_id}`,{credentials:'include'}).then(r=>r.json()).then(rows=>{
+          if(rows&&rows.length>0){
+            const s=rows[0];
+            document.getElementById('settingsNetSalary').textContent='₹'+Number(s.net_salary).toLocaleString('en-IN');
+            document.getElementById('settingsBasic').textContent='₹'+Number(s.basic_salary).toLocaleString('en-IN');
+            document.getElementById('settingsAllowance').textContent='+₹'+(Number(s.hra)+Number(s.other_allowances)).toLocaleString('en-IN');
+            document.getElementById('settingsDeductions').textContent='−₹'+Number(s.deductions).toLocaleString('en-IN');
+            document.getElementById('settingsSalaryMonth').textContent=s.effective_month;
+          } else {
+            document.getElementById('settingsNetSalary').textContent='Not set';
+          }
+        });
+      } else {
+        salaryBlock.style.display='none';
+      }
+    });
+  }
+
+  document.getElementById('rowEditProfile').addEventListener('click',()=>{
+    const newName=prompt('Enter new name:');
+    if(newName===null||!newName.trim())return;
+    const newEmail=prompt('Enter new email:');
+    if(newEmail===null||!newEmail.trim())return;
+    fetch('/profile',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      body:JSON.stringify({name:newName.trim(),email:newEmail.trim()})
+    }).then(r=>r.json().then(d=>({status:r.status,d})))
+    .then(({status,d})=>{
+      if(status===200){showToast('Profile updated!','success');loadSettingsProfile();}
+      else{showToast(d.error||'Update failed','danger');}
+    });
+  });
+
+  document.getElementById('rowChangePassword').addEventListener('click',()=>{
+    const current=prompt('Enter current password:');
+    if(current===null)return;
+    const newPass=prompt('Enter new password (min 6 characters):');
+    if(newPass===null)return;
+    fetch('/change-password',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      body:JSON.stringify({current_password:current,new_password:newPass})
+    }).then(r=>r.json().then(d=>({status:r.status,d})))
+    .then(({status,d})=>{
+      if(status===200){showToast('Password changed successfully!','success');}
+      else{showToast(d.error||'Change failed','danger');}
+    });
+  });
+
+  document.getElementById('settingsLogoutBtn').addEventListener('click',()=>{
+    fetch('/logout',{method:'POST',credentials:'include'}).then(()=>{location.reload();});
+  });
 
   checkSession();
 })();
