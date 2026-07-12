@@ -290,6 +290,17 @@
   </div>
 
   <div class="view" id="attendanceView">
+    <div class="card" id="gpsCheckinCard" style="display:none;background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;">
+      <div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:3px;margin-bottom:14px;">
+        <div class="gps-mode-opt active" id="modeOffice" style="flex:1;text-align:center;padding:8px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;">🏢 Office</div>
+        <div class="gps-mode-opt" id="modeWFH" style="flex:1;text-align:center;padding:8px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text-muted);">🏠 WFH</div>
+      </div>
+      <div id="gpsStatusBox" style="font-size:12.5px;color:var(--text-muted);margin-bottom:10px;">📍 Tap "Check In" to verify your location</div>
+      <button class="btn btn-primary" id="gpsCheckinBtn" style="width:100%;justify-content:center;">✓ Check In</button>
+    </div>
+    <style>
+      .gps-mode-opt.active{background:linear-gradient(135deg,var(--primary),#8B7CF6);color:#fff;}
+    </style>
     <div class="att-header">
       <div class="att-date" id="attDate">Today</div>
       <div class="att-summary" id="attSummary"></div>
@@ -607,7 +618,7 @@
     employeesActions.style.display='none';leavesActions.style.display='none';
     attActions.style.display='none';dashActions.style.display='none';salaryActions.style.display='none';
     if(tab==='employees'){tabEmployees.classList.add('active');employeesView.classList.add('active');employeesActions.style.display='flex';}
-    if(tab==='attendance'){tabAttendance.classList.add('active');attendanceView.classList.add('active');attActions.style.display='flex';loadAttendanceToday();}
+    if(tab==='attendance'){tabAttendance.classList.add('active');attendanceView.classList.add('active');attActions.style.display='flex';loadAttendanceToday();const gpsCard=document.getElementById('gpsCheckinCard');if(gpsCard){gpsCard.style.display=(currentUser&&currentUser.role==='employee')?'block':'none';}}
     if(tab==='leaves'){tabLeaves.classList.add('active');leavesView.classList.add('active');leavesActions.style.display='flex';loadLeaves();}
     if(tab==='salary'){tabSalary.classList.add('active');salaryView.classList.add('active');salaryActions.style.display='flex';loadSalaries();}
     if(tab==='dashboard'){tabDashboard.classList.add('active');dashboardView.classList.add('active');dashActions.style.display='flex';loadDashboard();}
@@ -1033,6 +1044,79 @@
     toast.textContent=message;
     document.getElementById('toastContainer').appendChild(toast);
     setTimeout(()=>toast.remove(),2900);
+  }
+
+
+  let gpsMode = 'office';
+  const modeOfficeBtn = document.getElementById('modeOffice');
+  const modeWFHBtn = document.getElementById('modeWFH');
+  const gpsStatusBox = document.getElementById('gpsStatusBox');
+  const gpsCheckinBtn = document.getElementById('gpsCheckinBtn');
+  const gpsCheckinCard = document.getElementById('gpsCheckinCard');
+
+  if(modeOfficeBtn){
+    modeOfficeBtn.addEventListener('click', () => {
+      gpsMode = 'office';
+      modeOfficeBtn.classList.add('active');
+      modeWFHBtn.classList.remove('active');
+      gpsStatusBox.textContent = '📍 Tap "Check In" to verify your location';
+    });
+    modeWFHBtn.addEventListener('click', () => {
+      gpsMode = 'wfh';
+      modeWFHBtn.classList.add('active');
+      modeOfficeBtn.classList.remove('active');
+      gpsStatusBox.textContent = '🏠 Working from home today';
+    });
+
+    gpsCheckinBtn.addEventListener('click', () => {
+      if(gpsMode === 'wfh'){
+        submitCheckin(null, null);
+        return;
+      }
+      if(!navigator.geolocation){
+        gpsStatusBox.textContent = '❌ Geolocation not supported by this browser';
+        return;
+      }
+      gpsStatusBox.textContent = '📍 Getting your location...';
+      gpsCheckinBtn.disabled = true;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          submitCheckin(pos.coords.latitude, pos.coords.longitude);
+        },
+        (err) => {
+          gpsStatusBox.textContent = '❌ Location access denied. Please enable location permissions.';
+          gpsCheckinBtn.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+  }
+
+  function submitCheckin(lat, lng){
+    fetch('/attendance/checkin', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+      body: JSON.stringify({ location_type: gpsMode, latitude: lat, longitude: lng })
+    })
+    .then(r => r.json().then(data => ({ status: r.status, data })))
+    .then(({status, data}) => {
+      gpsCheckinBtn.disabled = false;
+      if(status === 201){
+        gpsStatusBox.innerHTML = `✅ Checked in successfully ${data.distance ? '('+data.distance+'m from office)' : '(WFH)'}`;
+        gpsCheckinBtn.textContent = '✓ Checked In';
+        gpsCheckinBtn.disabled = true;
+        showToast('Attendance marked!', 'success');
+        loadAttendanceToday();
+      } else {
+        gpsStatusBox.textContent = '❌ ' + data.error;
+        showToast(data.error, 'danger');
+      }
+    })
+    .catch(() => {
+      gpsCheckinBtn.disabled = false;
+      gpsStatusBox.textContent = '❌ Something went wrong. Try again.';
+    });
   }
 
   checkSession();
