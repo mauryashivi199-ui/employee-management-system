@@ -13,7 +13,7 @@ db = mysql.connector.connect(
     password="root",
     database="mydb"
 )
-cursor = db.cursor()
+cursor = db.cursor(buffered=True)
 
 def login_required(f):
     @wraps(f)
