@@ -368,6 +368,30 @@
           </div>
         </div>
 
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin:22px 0 8px 4px;font-weight:700;">Unique Features</p>
+        <div class="card" style="background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+          <div class="row" id="rowLoginActivity" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(168,85,247,.18);color:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:16px;">🕓</div>
+            <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;">Login Activity</div><div style="font-size:11px;color:var(--text-muted);">See recent sessions & devices</div></div>
+            <div style="color:var(--text-muted);">›</div>
+          </div>
+          <div class="row" id="rowMyAnalytics" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(245,165,36,.18);color:var(--warning);display:flex;align-items:center;justify-content:center;font-size:16px;">📊</div>
+            <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;">My Analytics</div><div style="font-size:11px;color:var(--text-muted);">Personal attendance trends</div></div>
+            <div style="color:var(--text-muted);">›</div>
+          </div>
+          <div class="row" id="rowAchievements" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(6,182,212,.18);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;">🎯</div>
+            <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;">Goals & Achievements</div><div style="font-size:11px;color:var(--text-muted);">Streaks, badges, milestones</div></div>
+            <div style="color:var(--text-muted);">›</div>
+          </div>
+          <div class="row" id="rowExportData" style="display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;">
+            <div style="width:34px;height:34px;border-radius:10px;background:rgba(18,184,134,.18);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;font-size:16px;">📤</div>
+            <div style="flex:1;"><div style="font-size:13.5px;font-weight:600;">Export My Data</div><div style="font-size:11px;color:var(--text-muted);">Download all your records (JSON)</div></div>
+            <div style="color:var(--text-muted);">›</div>
+          </div>
+        </div>
+
         <button id="settingsLogoutBtn" style="margin-top:22px;width:100%;padding:12px;border-radius:12px;border:1px solid rgba(239,71,111,.35);background:rgba(239,71,111,.08);color:var(--danger);font-weight:700;font-size:13px;cursor:pointer;">🚪 Log Out</button>
       </div>
     </div>
@@ -1235,6 +1259,47 @@
 
   document.getElementById('settingsLogoutBtn').addEventListener('click',()=>{
     fetch('/logout',{method:'POST',credentials:'include'}).then(()=>{location.reload();});
+  });
+
+
+  document.getElementById('rowLoginActivity').addEventListener('click',()=>{
+    fetch('/login-activity',{credentials:'include'}).then(r=>r.json()).then(rows=>{
+      if(rows.length===0){alert('No login history yet.');return;}
+      const msg = rows.map(r=>`${r.login_time} — IP: ${r.ip_address}`).join('\n');
+      alert('Recent Logins:\n\n' + msg);
+    });
+  });
+
+  document.getElementById('rowMyAnalytics').addEventListener('click',()=>{
+    fetch('/my-analytics',{credentials:'include'}).then(r=>r.json()).then(d=>{
+      if(d.error){alert(d.error);return;}
+      alert(`My Analytics (last ${d.total_days} days)\n\nAttendance: ${d.attendance_percentage}%\nPresent: ${d.present}\nHalf-day: ${d.half_day}\nAbsent: ${d.absent}`);
+    });
+  });
+
+  document.getElementById('rowAchievements').addEventListener('click',()=>{
+    fetch('/my-achievements',{credentials:'include'}).then(r=>r.json()).then(d=>{
+      if(d.error){alert(d.error);return;}
+      let msg = `🔥 Current Streak: ${d.current_streak} days\n⭐ Total Present: ${d.total_present} days\n\n`;
+      if(d.badges.length===0){
+        msg += 'No badges yet — keep showing up!';
+      } else {
+        msg += 'Badges Earned:\n' + d.badges.map(b=>`${b.icon} ${b.name} — ${b.desc}`).join('\n');
+      }
+      alert(msg);
+    });
+  });
+
+  document.getElementById('rowExportData').addEventListener('click',()=>{
+    fetch('/export-my-data',{credentials:'include'}).then(r=>r.json()).then(data=>{
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download='my_ems_data.json';
+      document.body.appendChild(a);a.click();a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Data exported!','success');
+    });
   });
 
   checkSession();
