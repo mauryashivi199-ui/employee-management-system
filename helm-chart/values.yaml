@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: 10.89.40.52:30443/ems-project/ems-app
-  tag: v7
+  tag: v8
   pullPolicy: Always
 service:
   type: NodePort
