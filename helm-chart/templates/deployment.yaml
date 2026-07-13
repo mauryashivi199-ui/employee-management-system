@@ -18,17 +18,11 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.port }}
-        env:
-        - name: MYSQL_HOST
-          value: {{ .Values.mysql.host }}
-        - name: MYSQL_PORT
-          value: "{{ .Values.mysql.port }}"
-        - name: MYSQL_USER
-          value: {{ .Values.mysql.user }}
-        - name: MYSQL_PASSWORD
-          value: {{ .Values.mysql.password }}
-        - name: MYSQL_DATABASE
-          value: {{ .Values.mysql.database }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config
+        - secretRef:
+            name: {{ .Release.Name }}-secret
         resources:
           requests:
             cpu: {{ .Values.resources.requests.cpu }}
