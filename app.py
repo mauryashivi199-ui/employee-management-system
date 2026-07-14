@@ -15,6 +15,20 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor(buffered=True)
 
+@app.before_request
+def ensure_db_connection():
+    global db, cursor
+    try:
+        db.ping(reconnect=True, attempts=3, delay=2)
+    except Exception:
+        db = mysql.connector.connect(
+            host="mysql-service",
+            user="root",
+            password="root",
+            database="mydb"
+        )
+        cursor = db.cursor(buffered=True)
+
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
