@@ -1,13 +1,15 @@
-FROM python:3.11
+FROM python:3.11-slim
 
 WORKDIR /app
 
 COPY requirements.txt .
-
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5000
+# Non-root user banao aur app folder ka ownership do
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
 
+EXPOSE 5000
 CMD ["python","app.py"]
