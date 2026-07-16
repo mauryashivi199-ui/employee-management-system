@@ -44,6 +44,10 @@ spec:
           capabilities:
             drop:
               - ALL
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sh", "-c", "echo 'Graceful shutdown starting...' && sleep 10"]
         ports:
         - containerPort: {{ .Values.service.port }}
         envFrom:
